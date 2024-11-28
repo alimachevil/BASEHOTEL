@@ -60,18 +60,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $celular = $_POST['celular'];
     $pais = $_POST['pais'];
 
-    // Guardar los datos del cliente en sesión
-    $_SESSION['cliente'] = [
-        'nombre' => $nombre,
-        'apellido' => $apellido,
-        'tipo_documento' => $tipo_documento,
-        'nro_documento' => $nro_documento,
-        'correo' => $correo,
-        'celular' => $celular,
-        'pais' => $pais,
-    ];
+    // Calcular el total de la reserva
+    $total_pago = 0;
+    foreach ($habitaciones_info as $habitacion) {
+        $total_pago += $habitacion['precio_base'] * $dias_estadia;
+    }
 
-    // Redirigir a la página de confirmación de pago
+    // Insertar datos del cliente en la tabla `clientes`
+    $query_cliente = "
+        INSERT INTO clientes (nombre, apellido, tipo_documento, nro_documento, celular, pais, correo)
+        VALUES ('$nombre', '$apellido', '$tipo_documento', '$nro_documento', '$celular', '$pais', '$correo')
+    ";
+    if (!$conn->query($query_cliente)) {
+        die("Error al guardar el cliente: " . $conn->error);
+    }
+    $id_cliente = $conn->insert_id;
+
+    // Insertar la reserva en la tabla `reservas`
+    $fecha_reserva = date('Y-m-d H:i:s'); // Fecha actual
+    $id_promocion = null; // Asumimos sin promociones
+    $id_hotel = 1; // Asumimos un hotel por defecto
+    $query_reserva = "
+        INSERT INTO reservas (fecha_reserva, fecha_checkin, fecha_checkout, total_pago, id_cliente, id_promocion, id_hotel)
+        VALUES ('$fecha_reserva', '$check_in', '$check_out', $total_pago, $id_cliente, " . ($id_promocion ? $id_promocion : 'NULL') . ", $id_hotel)
+    ";
+    if (!$conn->query($query_reserva)) {
+        die("Error al guardar la reserva: " . $conn->error);
+    }
+    $id_reserva = $conn->insert_id;
+
+    // Insertar la relación entre la reserva y las habitaciones seleccionadas
+    foreach ($cuartos_seleccionados as $id_cuarto) {
+        $query_reservaporcuartos = "
+            INSERT INTO reservaporcuartos (id_reserva, id_cuarto)
+            VALUES ($id_reserva, $id_cuarto)
+        ";
+        if (!$conn->query($query_reservaporcuartos)) {
+            die("Error al guardar la relación de reserva y cuartos: " . $conn->error);
+        }
+    }
+
+    // Guardar el ID de reserva en sesión y redirigir a la página de confirmación
+    $_SESSION['id_reserva'] = $id_reserva;
     header('Location: confirmacion_pago.php');
     exit();
 }
@@ -97,7 +127,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <li>
                 Habitación <?php echo htmlspecialchars($habitacion['numero']); ?> - 
                 Costo por noche: <?php echo htmlspecialchars($habitacion['precio_base']); ?> USD
-                <button onclick="location.href='gestionh.php';">Modificar</button>
             </li>
         <?php endforeach; ?>
     </ul>
