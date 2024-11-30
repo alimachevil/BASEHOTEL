@@ -52,11 +52,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             nuevaHabitacion.innerHTML = `
                 <h3>Habitación ${index}</h3>
                 <label for="adultos_${index}">Cantidad de Adultos:</label>
-                <input type="number" id="adultos_${index}" name="adultos[]" min="1" required>
+                <select id="adultos_${index}" name="adultos[]" required>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
                 <br><br>
                 
                 <label for="ninos_${index}">Cantidad de Niños:</label>
-                <input type="number" id="ninos_${index}" name="ninos[]" min="0" required>
+                <select id="ninos_${index}" name="ninos[]" required>
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                </select>
                 <br><br>
             `;
             
@@ -80,11 +89,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="habitacion">
                 <h3>Habitación 1</h3>
                 <label for="adultos_1">Cantidad de Adultos:</label>
-                <input type="number" id="adultos_1" name="adultos[]" min="1" required>
+                <select id="adultos_1" name="adultos[]" required>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
                 <br><br>
                 
                 <label for="ninos_1">Cantidad de Niños:</label>
-                <input type="number" id="ninos_1" name="ninos[]" min="0" required>
+                <select id="ninos_1" name="ninos[]" required>
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                </select>
                 <br><br>
             </div>
         </div>

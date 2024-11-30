@@ -2,6 +2,11 @@
 // Inicia la sesión
 session_start();
 
+// Limpiar toda la información de sesión previa
+session_unset();
+session_destroy();
+session_start();
+
 // Datos de conexión a la base de datos
 $host = 'localhost';
 $user = 'root';
