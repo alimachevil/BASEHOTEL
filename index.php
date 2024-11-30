@@ -39,25 +39,174 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reserva de Hotel</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        .navbar {
+            background-color: #2A2A2A;
+        }
+        .navbar .navbar-nav .nav-link {
+            color: white;
+            font-weight: 500;
+        }
+        .navbar .navbar-nav .nav-link:hover {
+            color: #FF6F00;
+        }
+        .carousel-item img {
+            height: 600px;
+            object-fit: cover;
+        }
+        .reservation-form {
+            margin-top: -80px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            position: relative;
+        }
+        .services .card {
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        footer {
+            background-color: #2A2A2A;
+            color: white;
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Reserva de Hotel</h1>
-    
-    <form action="index.php" method="POST">
-        <label for="check_in">Fecha Check-in:</label>
-        <input type="date" id="check_in" name="check_in" required>
-        <br><br>
-        
-        <label for="check_out">Fecha Check-out:</label>
-        <input type="date" id="check_out" name="check_out" required>
-        <br><br>
-        
-        <button type="submit">Buscar</button>
-    </form>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Casa Andina</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Ofertas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Destinos y Hoteles</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Life</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Restaurantes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Corporativo</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <?php
-    // Cerrar la conexión a la base de datos
-    $conn->close();
-    ?>
+    <!-- Carousel -->
+    <div id="hotelCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <a href="#reserva-estadia"><img src="https://via.placeholder.com/1920x600?text=Habitación+1" class="d-block w-100" alt="Habitación 1"></a>
+            </div>
+            <div class="carousel-item">
+                <a href="#reserva-estadia"><img src="https://via.placeholder.com/1920x600?text=Habitación+2" class="d-block w-100" alt="Habitación 2"></a>
+            </div>
+            <div class="carousel-item">
+                <a href="#reserva-estadia"><img src="https://via.placeholder.com/1920x600?text=Piscina+del+Hotel" class="d-block w-100" alt="Piscina del Hotel"></a>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#hotelCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#hotelCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+        </button>
+    </div>
+
+    <!-- Formulario de Reserva -->
+    <div id="reserva-estadia" class="container reservation-form">
+        <h2 class="text-center mb-4">¡Reserva tu estadía!</h2>
+        <form action="index.php" method="POST">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="check_in" class="form-label">Fecha Check-in</label>
+                    <input type="date" class="form-control" id="check_in" name="check_in" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="check_out" class="form-label">Fecha Check-out</label>
+                    <input type="date" class="form-control" id="check_out" name="check_out" required>
+                </div>
+                <div class="col-md-12">
+                    <label for="location" class="form-label">Elige la sede</label>
+                    <select class="form-select" id="location" name="location">
+                        <option value="" disabled selected>Selecciona una opción</option>
+                        <option value="lima">Lima</option>
+                        <option value="cusco">Cusco</option>
+                        <option value="arequipa">Arequipa</option>
+                        <option value="tacna">Tacna</option>
+                    </select>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-warning btn-lg">Buscar Disponibilidad</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Servicios Destacados -->
+    <section class="py-5 services">
+        <div class="container">
+            <h2 class="section-title">Nuestros Servicios</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="https://via.placeholder.com/400x200" class="card-img-top" alt="Spa">
+                        <div class="card-body">
+                            <h5 class="card-title">Spa y Relax</h5>
+                            <p class="card-text">Disfruta de tratamientos relajantes en nuestro spa exclusivo.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="https://via.placeholder.com/400x200" class="card-img-top" alt="Restaurante">
+                        <div class="card-body">
+                            <h5 class="card-title">Restaurante Gourmet</h5>
+                            <p class="card-text">Saborea los mejores platillos preparados por chefs de clase mundial.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="https://via.placeholder.com/400x200" class="card-img-top" alt="Salón de eventos">
+                        <div class="card-body">
+                            <h5 class="card-title">Salón de Eventos</h5>
+                            <p class="card-text">Organiza reuniones y celebraciones en nuestro moderno salón.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center">
+        <div class="container">
+            <p>&copy; 2024 Casa Andina. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
