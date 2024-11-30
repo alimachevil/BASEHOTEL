@@ -49,34 +49,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['huéspedes'])) {
         $huespedes = $_POST['huéspedes'];
 
-        foreach ($huespedes as $habitacionId => $huespedesHabitacion) {
-            foreach ($huespedesHabitacion as $huesped) {
-                $nombre = $huesped['nombre'];
-                $apellido = $huesped['apellido'];
-                $tipo_documento = $huesped['tipo_documento'];
-                $nro_documento = $huesped['nro_documento'];
-                $celular = $huesped['celular'] ?? null;
-                $pais = $huesped['pais'];
-                $correo = $huesped['correo'] ?? null;
+        // Iniciar transacción
+        $conn->begin_transaction();
 
-                // Insertar en la tabla acompañantes
-                $query_acompanante = "
-                    INSERT INTO acompañantes (nombre, apellido, tipo_documento, nro_documento, celular, pais, correo, id_reserva)
-                    VALUES ('$nombre', '$apellido', '$tipo_documento', '$nro_documento', " . 
-                    ($celular ? "'$celular'" : "NULL") . ", '$pais', " . 
-                    ($correo ? "'$correo'" : "NULL") . ", $id_reserva)
-                ";
-                if (!$conn->query($query_acompanante)) {
-                    die("Error al guardar acompañante: " . $conn->error);
+        try {
+            // Iterar sobre las habitaciones
+            foreach ($huespedes as $habitacionId => $huespedesHabitacion) {
+                // Iterar sobre los huéspedes de cada habitación
+                foreach ($huespedesHabitacion as $index => $datosHuesped) {
+                    // Extraer datos del huésped
+                    $nombre = $datosHuesped['nombre'] ?? null;
+                    $apellido = $datosHuesped['apellido'] ?? null;
+                    $tipo_documento = $datosHuesped['tipo_documento'] ?? null;
+                    $nro_documento = $datosHuesped['nro_documento'] ?? null;
+                    $celular = $datosHuesped['celular'] ?? null;
+                    $pais = $datosHuesped['pais'] ?? null;
+                    $correo = $datosHuesped['correo'] ?? null;
+
+                    // Validar que todos los campos requeridos estén completos
+                    if ($nombre && $apellido && $tipo_documento && $nro_documento && $pais) {
+                        // Insertar en la tabla acompañantes
+                        $query_acompanante = "
+                            INSERT INTO acompañantes (nombre, apellido, tipo_documento, nro_documento, celular, pais, correo, id_reserva)
+                            VALUES ('$nombre', '$apellido', '$tipo_documento', '$nro_documento', " . 
+                            ($celular ? "'$celular'" : "NULL") . ", '$pais', " . 
+                            ($correo ? "'$correo'" : "NULL") . ", $id_reserva)
+                        ";
+                        if (!$conn->query($query_acompanante)) {
+                            throw new Exception("Error al guardar acompañante: " . $conn->error);
+                        }
+                    } else {
+                        throw new Exception("Datos incompletos para el huésped en habitación $habitacionId.");
+                    }
                 }
             }
-        }
 
-        // Redirigir a una página de confirmación
-        header('Location: confirmacion_huespedes.php');
-        exit();
+            // Confirmar transacción
+            $conn->commit();
+
+            // Redirigir a una página de confirmación
+            header('Location: confirmacion_huespedes.php');
+            exit();
+        } catch (Exception $e) {
+            // Si hay un error, hacer rollback
+            $conn->rollback();
+            die("Error al guardar los acompañantes: " . $e->getMessage());
+        }
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -156,21 +177,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ?>
             <h2>Habitación <?php echo htmlspecialchars($habitacion['numero']); ?> (Máximo <?php echo $maxHuespedes; ?> huéspedes)</h2>
             <div id="habitacion-<?php echo $habitacion['id_cuarto']; ?>" data-max-formularios="<?php echo $maxHuespedes; ?>">
-                <!-- Formulario base -->
                 <div class="huesped-form">
-                    <label>Nombre: <input type="text" name="huéspedes[<?php echo $habitacion['id_cuarto']; ?>][][nombre]" required></label>
-                    <label>Apellido: <input type="text" name="huéspedes[<?php echo $habitacion['id_cuarto']; ?>][][apellido]" required></label>
+                    <label>Nombre: <input type="text" name="huéspedes[<?php echo $habitacion['id_cuarto']; ?>][0][nombre]" required></label>
+                    <label>Apellido: <input type="text" name="huéspedes[<?php echo $habitacion['id_cuarto']; ?>][0][apellido]" required></label>
                     <label>Tipo de Documento:
-                        <select name="huéspedes[<?php echo $habitacion['id_cuarto']; ?>][][tipo_documento]" required>
+                        <select name="huéspedes[<?php echo $habitacion['id_cuarto']; ?>][0][tipo_documento]" required>
                             <option value="DNI">DNI</option>
                             <option value="Pasaporte">Pasaporte</option>
                             <option value="Otro">Otro</option>
                         </select>
                     </label>
-                    <label>Número de Documento: <input type="text" name="huéspedes[<?php echo $habitacion['id_cuarto']; ?>][][nro_documento]" required></label>
-                    <label>Celular: <input type="text" name="huéspedes[<?php echo $habitacion['id_cuarto']; ?>][][celular]"></label>
-                    <label>País: <input type="text" name="huéspedes[<?php echo $habitacion['id_cuarto']; ?>][][pais]" required></label>
-                    <label>Correo: <input type="email" name="huéspedes[<?php echo $habitacion['id_cuarto']; ?>][][correo]"></label>
+                    <label>Número de Documento: <input type="text" name="huéspedes[<?php echo $habitacion['id_cuarto']; ?>][0][nro_documento]" required></label>
+                    <label>Celular: <input type="text" name="huéspedes[<?php echo $habitacion['id_cuarto']; ?>][0][celular]"></label>
+                    <label>País: <input type="text" name="huéspedes[<?php echo $habitacion['id_cuarto']; ?>][0][pais]" required></label>
+                    <label>Correo: <input type="email" name="huéspedes[<?php echo $habitacion['id_cuarto']; ?>][0][correo]"></label>
                 </div>
             </div>
             <button type="button" onclick="añadirHuesped(<?php echo $habitacion['id_cuarto']; ?>)">Añadir otro huésped</button>
