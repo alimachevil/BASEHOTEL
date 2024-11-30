@@ -10,6 +10,7 @@ if (!isset($_SESSION['id_reserva'])) {
 
 // Variables de sesión
 $id_reserva = $_SESSION['id_reserva'];
+$habitaciones = $_SESSION['habitaciones']; // Si las habitaciones están en la sesión
 ?>
 
 <!DOCTYPE html>
@@ -25,7 +26,8 @@ $id_reserva = $_SESSION['id_reserva'];
     <p><strong>ID de Reserva:</strong> <?php echo htmlspecialchars($id_reserva); ?></p>
     
     <h2>Opciones:</h2>
-    <button onclick="location.href='completarreserva.php';">Completar Datos de Reserva</button>
+    <button onclick="location.href='reserva_pago_opcion2.php';">Completar datos Reserva</button>
+
     <button onclick="location.href='index.php';">Omitir</button>
 </body>
 </html>
