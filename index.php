@@ -87,46 +87,203 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Casa Andina</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Ofertas</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Destinos y Hoteles</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Life</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Restaurantes</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Corporativo</a>
-                    </li>
-                </ul>
+ <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva de Hotel</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lato', 'Roboto', sans-serif !important;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+        }
+        .navbar {
+            max-width: 1140px;
+            width: 100%;
+            height: 69px;
+        }
+        .navbar-brand {
+            height: 50px;
+            display: flex;
+            align-items: center;
+        }
+        .navbar-nav {
+            margin-left: auto;
+            display: flex;
+            gap: 20px;
+        }
+        .nav-link {
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .nav-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva de Hotel</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lato', 'Roboto', sans-serif !important;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+        }
+        .navbar {
+            max-width: 1140px;
+            width: 100%;
+            height: 69px;
+        }
+        .navbar-brand {
+            height: 50px;
+            display: flex;
+            align-items: center;
+        }
+        .navbar-nav {
+            margin-left: auto;
+            display: flex;
+            gap: 20px;
+        }
+        .nav-link {
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .nav-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva de Hotel</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lato', 'Roboto', sans-serif !important;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+        }
+        .navbar {
+            max-width: 1140px;
+            width: 100%;
+            height: 69px;
+        }
+        .navbar-brand img {
+            height: 50px; /* Ajusta la altura del logo */
+        }
+        .navbar-nav {
+            margin-left: auto;
+            display: flex;
+            gap: 20px;
+        }
+        .nav-link {
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .nav-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Encabezado -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <img src="images/logo.png" alt="Logo Casa Andina"> <!-- Cambia el 'path/to/logo.png' por la ruta de tu logo -->
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Ofertas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Destinos y Hoteles</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Life</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Restaurantes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Corporativo</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
+    </header>
+</body>
+</html>
+
+
 
     <!-- Carousel -->
     <div id="hotelCarousel" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <a href="#reserva-estadia"><img src="https://via.placeholder.com/1920x600?text=Habitación+1" class="d-block w-100" alt="Habitación 1"></a>
+                <a href="#reserva-estadia"><img src="https://s3.us-east-1.amazonaws.com/ca-webprod/Ambientes/fe7469e0-9920-4f67-9cb7-58b28bb05cb4.jpg" class="d-block w-100" alt="Habitación 1"></a>
             </div>
             <div class="carousel-item">
-                <a href="#reserva-estadia"><img src="https://via.placeholder.com/1920x600?text=Habitación+2" class="d-block w-100" alt="Habitación 2"></a>
+                <a href="#reserva-estadia"><img src="https://s3.us-east-1.amazonaws.com/ca-webprod/Ambientes/85ab2ef3-f0b0-492c-a08d-e5ae2aed57c4.jpg" class="d-block w-100" alt="Habitación 2"></a>
             </div>
             <div class="carousel-item">
-                <a href="#reserva-estadia"><img src="https://via.placeholder.com/1920x600?text=Piscina+del+Hotel" class="d-block w-100" alt="Piscina del Hotel"></a>
+                <a href="#reserva-estadia"><img src="https://s3.us-east-1.amazonaws.com/ca-webprod/Ambientes/0be34178-1fec-4c47-aa2d-cecc13e8f77b.jpg" class="d-block w-100" alt="Piscina del Hotel"></a>
             </div>
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#hotelCarousel" data-bs-slide="prev">
@@ -172,11 +329,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Servicios Destacados -->
     <section class="py-5 services">
         <div class="container">
-            <h2 class="section-title">Nuestros Servicios</h2>
+            <h2 class="text-center mb-4">Nuestros Servicios</h2>
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="card">
-                        <img src="https://via.placeholder.com/400x200" class="card-img-top" alt="Spa">
+                        <img src="https://s3.us-east-1.amazonaws.com/ca-webprod/Ambientes/a1140a78-c8b7-4fa0-969e-7d6514bbe12e.jpg" class="card-img-top" alt="Spa">
                         <div class="card-body">
                             <h5 class="card-title">Spa y Relax</h5>
                             <p class="card-text">Disfruta de tratamientos relajantes en nuestro spa exclusivo.</p>
@@ -185,7 +342,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="col-md-4">
                     <div class="card">
-                        <img src="https://via.placeholder.com/400x200" class="card-img-top" alt="Restaurante">
+                        <img src="https://s3.us-east-1.amazonaws.com/ca-webprod/Ambientes/8cf07adc-5ef0-44ad-be27-a30ec750ce3e.jpg" class="card-img-top" alt="Restaurante">
                         <div class="card-body">
                             <h5 class="card-title">Restaurante Gourmet</h5>
                             <p class="card-text">Saborea los mejores platillos preparados por chefs de clase mundial.</p>
@@ -194,10 +351,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="col-md-4">
                     <div class="card">
-                        <img src="https://via.placeholder.com/400x200" class="card-img-top" alt="Salón de eventos">
+                        <img src="https://s3.us-east-1.amazonaws.com/ca-webprod/Ambientes/1331c77b-eb30-4b4f-8114-2c694fbde841.jpg" class="card-img-top" alt="Salón de eventos">
                         <div class="card-body">
-                            <h5 class="card-title">Salón de Eventos</h5>
-                            <p class="card-text">Organiza reuniones y celebraciones en nuestro moderno salón.</p>
+                            <h5 class="card-title">Bartender</h5>
+                            <p class="card-text">Toma las mejores bebidas de la ciudad con nuestro servicio de bar.</p>
                         </div>
                     </div>
                 </div>
@@ -258,13 +415,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h2 class="text-center mb-4">Galería de Fotos</h2>
         <div class="row g-4">
             <div class="col-md-4">
-                <img src="https://via.placeholder.com/400x300" class="img-fluid rounded" alt="Restaurante">
+                <img src="https://s3.us-east-1.amazonaws.com/ca-webprod/Ambientes/3505ce84-0f3f-4423-b2a3-62277082ef2f.jpg" class="img-fluid rounded" alt="Restaurante">
             </div>
             <div class="col-md-4">
-                <img src="https://via.placeholder.com/400x300" class="img-fluid rounded" alt="Bar">
+                <img src="	https://s3.us-east-1.amazonaws.com/ca-webprod/Ambientes/f129b552-6877-43b2-a010-b1b1bb87be78.jpg" class="img-fluid rounded" alt="Bar">
             </div>
             <div class="col-md-4">
-                <img src="https://via.placeholder.com/400x300" class="img-fluid rounded" alt="Piscina">
+                <img src="https://s3.us-east-1.amazonaws.com/ca-webprod/Ambientes/d0ee5b05-5b44-4b3c-9ab2-32f9b4d6b4f7.jpg" class="img-fluid rounded" alt="Piscina">
             </div>
         </div>
     </div>
@@ -281,7 +438,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <h5 class="card-title">Black Days</h5>
                         <p class="card-text">35% de descuento</p>
                         <p><strong>S/ 371</strong> <del>S/ 572</del></p>
-                        <a href="#" class="btn btn-warning">Reservar</a>
+                        <a href="#reserva-estadia" class="btn btn-warning">Reservar</a>
                     </div>
                 </div>
             </div>
@@ -291,7 +448,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <h5 class="card-title">Desayuno Buffet</h5>
                         <p class="card-text">2x S/ 84</p>
                         <p>Lunes a domingo de 7:00 a.m. a 10:00 a.m.</p>
-                        <a href="#" class="btn btn-warning">Reservar</a>
+                        <a href="#reserva-estadia" class="btn btn-warning">Reservar</a>
                     </div>
                 </div>
             </div>
@@ -313,7 +470,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             "Linda estadía en este lindo hotel. ¡Increíble servicio y excelente ubicación!"
                         </p>
                         <div class="d-flex align-items-center mt-3">
-                            <img src="https://via.placeholder.com/50" alt="User" class="rounded-circle me-3">
+                            <img src="https://s3.us-east-1.amazonaws.com/ca-webprod/pais/CL.svg" alt="User" class="rounded-circle me-3" style="width: 50px; height: 50px;">
                             <div>
                                 <h6 class="mb-0">Stephanie G.</h6>
                                 <small class="text-muted">19 nov, 2024</small>
@@ -331,7 +488,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             "El trato fue delicioso, la comida muy buena y la atención excelente."
                         </p>
                         <div class="d-flex align-items-center mt-3">
-                            <img src="https://via.placeholder.com/50" alt="User" class="rounded-circle me-3">
+                            <img src="	https://s3.us-east-1.amazonaws.com/ca-webprod/pais/PE.svg" alt="User" class="rounded-circle me-3" style="width: 50px; height: 50px;">
                             <div>
                                 <h6 class="mb-0">Lorena G.</h6>
                                 <small class="text-muted">11 nov, 2024</small>
@@ -349,7 +506,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             "La comida estuvo muy rica, y la atención del personal fue excepcional."
                         </p>
                         <div class="d-flex align-items-center mt-3">
-                            <img src="https://via.placeholder.com/50" alt="User" class="rounded-circle me-3">
+                            <img src="https://s3.us-east-1.amazonaws.com/ca-webprod/pais/NL.svg" alt="User" class="rounded-circle me-3" style="width: 50px; height: 50px;">
                             <div>
                                 <h6 class="mb-0">Junior G.</h6>
                                 <small class="text-muted">3 nov, 2024</small>
@@ -362,11 +519,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </section>
 
-
     <!-- Footer -->
     <footer class="text-center">
         <div class="container">
-            <p>&copy; 2024 Casa Andina. Todos los derechos reservados.</p>
+            <p>&copy; 2024 Vista Andina. Todos los derechos reservados por mi.</p>
         </div>
     </footer>
 
