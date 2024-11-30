@@ -59,18 +59,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservar'])) {
     }
 }
 
-// Manejo del SQL para evitar errores con `NOT IN`
-$not_in_clause = '';
-if (!empty($cuartos_seleccionados)) {
-    $ids_seleccionados = implode(',', array_map('intval', array_column($cuartos_seleccionados, 'id_cuarto')));
-    $not_in_clause = "AND c.id_cuarto NOT IN ($ids_seleccionados)";
-}
-
 // Consulta para obtener los cuartos disponibles
 $cuartos_disponibles = [];
 for ($i = 0; $i < $habitaciones; $i++) {
     $capacidad_adultos = (int) $adultos[$i];
     $capacidad_ninos = (int) $ninos[$i];
+
+    // Manejar habitaciones ya seleccionadas dinámicamente
+    $not_in_clause = '';
+    if (!empty($cuartos_seleccionados)) {
+        $ids_seleccionados = implode(',', array_map('intval', array_column($cuartos_seleccionados, 'id_cuarto')));
+        $not_in_clause = "AND c.id_cuarto NOT IN ($ids_seleccionados)";
+    }
 
     $query = "
         SELECT c.*

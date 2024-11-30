@@ -18,7 +18,7 @@ if (!isset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['cuartos_sel
 // Variables de sesión
 $check_in = $_SESSION['check_in'];
 $check_out = $_SESSION['check_out'];
-$cuartos_seleccionados = $_SESSION['cuartos_seleccionados']; // IDs de las habitaciones seleccionadas
+$cuartos_seleccionados = $_SESSION['cuartos_seleccionados']; // Array con habitaciones seleccionadas
 
 // Conexión a la base de datos
 $host = 'localhost';
@@ -32,10 +32,14 @@ if ($conn->connect_error) {
     die("Error en la conexión a la base de datos: " . $conn->connect_error);
 }
 
+// Extraer los IDs de las habitaciones seleccionadas
+$ids = implode(',', array_map(function($cuarto) {
+    return intval($cuarto['id_cuarto']);
+}, $cuartos_seleccionados));
+
 // Consultar información de las habitaciones seleccionadas
 $habitaciones_info = [];
-if (!empty($cuartos_seleccionados)) {
-    $ids = implode(',', array_map('intval', $cuartos_seleccionados));
+if (!empty($ids)) {
     $query = "SELECT id_cuarto, numero, precio_base FROM cuartos WHERE id_cuarto IN ($ids)";
     $result = $conn->query($query);
 
@@ -90,7 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_reserva = $conn->insert_id;
 
     // Insertar la relación entre la reserva y las habitaciones seleccionadas
-    foreach ($cuartos_seleccionados as $id_cuarto) {
+    foreach ($cuartos_seleccionados as $cuarto) {
+        $id_cuarto = intval($cuarto['id_cuarto']);
         $query_reservaporcuartos = "
             INSERT INTO reservaporcuartos (id_reserva, id_cuarto)
             VALUES ($id_reserva, $id_cuarto)
@@ -132,6 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </ul>
 
     <!-- Formulario para los datos del cliente -->
+    <form action="pagoh.php" method="POST">
     <h2>Datos del Cliente:</h2>
     <form action="pagoh.php" method="POST">
         <label for="nombre">Nombre:</label>
@@ -165,8 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label for="pais">País:</label>
         <input type="text" id="pais" name="pais" required>
         <br><br>
-
-        <!-- Resumen de costos -->
+        <!-- Resumen -->
         <h2>Resumen:</h2>
         <?php
         $total = 0;
@@ -178,8 +183,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ?>
         <h3>Total: <?php echo htmlspecialchars($total); ?> USD</h3>
         <br><br>
-
-        <!-- Botón de pago -->
         <button type="submit">Proceder al Pago</button>
     </form>
 </body>
