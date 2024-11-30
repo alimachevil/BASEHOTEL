@@ -42,43 +42,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-        }
-        .navbar {
-            background-color: #2A2A2A;
-        }
-        .navbar .navbar-nav .nav-link {
-            color: white;
-            font-weight: 500;
-        }
-        .navbar .navbar-nav .nav-link:hover {
-            color: #FF6F00;
-        }
-        .carousel-item img {
-            height: 600px;
-            object-fit: cover;
-        }
-        .reservation-form {
-            margin-top: -80px;
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 10;
-            position: relative;
-        }
-        .services .card {
-            border: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        footer {
-            background-color: #2A2A2A;
-            color: white;
-            padding: 20px;
-        }
-    </style>
+    body {
+        font-family: 'Lato', 'Roboto', sans-serif !important;
+        background-color: #f5f5f5;
+    }
+    .navbar {
+        background-color: #2A2A2A;
+    }
+    .navbar .navbar-nav .nav-link {
+        color: white;
+        font-weight: 500;
+    }
+    .navbar .navbar-nav .nav-link:hover {
+        color: #FF6F00;
+    }
+    .carousel-item img {
+        height: 600px;
+        object-fit: cover;
+    }
+    .reservation-form {
+        margin-top: -80px;
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        position: relative;
+    }
+    .services .card {
+        border: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    footer {
+        background-color: #2A2A2A;
+        color: white;
+        padding: 20px;
+    }
+</style>
+
 </head>
 <body>
     <!-- Navbar -->
@@ -198,6 +204,164 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </section>
+
+<!-- Sección: Más Servicios -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Más Servicios</h2>
+        <div class="row text-center g-4">
+            <div class="col-md-2">
+                <div class="p-3">
+                    <i class="bi bi-universal-access fs-1 text-warning"></i>
+                    <p class="mt-2">Acceso Adaptado</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-3">
+                    <i class="bi bi-wind fs-1 text-warning"></i>
+                    <p class="mt-2">Aire Acondicionado</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-3">
+                    <i class="bi bi-cup-hot fs-1 text-warning"></i>
+                    <p class="mt-2">Bar/Lounge</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-3">
+                    <i class="bi bi-building fs-1 text-warning"></i>
+                    <p class="mt-2">Ascensores</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-3">
+                    <i class="bi bi-translate fs-1 text-warning"></i>
+                    <p class="mt-2">Personal Multilingüe</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-3">
+                    <i class="bi bi-shield-check fs-1 text-warning"></i>
+                    <p class="mt-2">Seguridad 24h</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<!-- Galería de Fotos -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Galería de Fotos</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <img src="https://via.placeholder.com/400x300" class="img-fluid rounded" alt="Restaurante">
+            </div>
+            <div class="col-md-4">
+                <img src="https://via.placeholder.com/400x300" class="img-fluid rounded" alt="Bar">
+            </div>
+            <div class="col-md-4">
+                <img src="https://via.placeholder.com/400x300" class="img-fluid rounded" alt="Piscina">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Ofertas -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Ofertas Especiales</h2>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Black Days</h5>
+                        <p class="card-text">35% de descuento</p>
+                        <p><strong>S/ 371</strong> <del>S/ 572</del></p>
+                        <a href="#" class="btn btn-warning">Reservar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Desayuno Buffet</h5>
+                        <p class="card-text">2x S/ 84</p>
+                        <p>Lunes a domingo de 7:00 a.m. a 10:00 a.m.</p>
+                        <a href="#" class="btn btn-warning">Reservar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonios Mejorados -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Lo que dicen nuestros huéspedes</h2>
+        <div class="row g-4">
+            <!-- Testimonio 1 -->
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <p class="card-text text-muted">
+                            <i class="bi bi-quote fs-2 text-warning"></i> 
+                            "Linda estadía en este lindo hotel. ¡Increíble servicio y excelente ubicación!"
+                        </p>
+                        <div class="d-flex align-items-center mt-3">
+                            <img src="https://via.placeholder.com/50" alt="User" class="rounded-circle me-3">
+                            <div>
+                                <h6 class="mb-0">Stephanie G.</h6>
+                                <small class="text-muted">19 nov, 2024</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Testimonio 2 -->
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <p class="card-text text-muted">
+                            <i class="bi bi-quote fs-2 text-warning"></i> 
+                            "El trato fue delicioso, la comida muy buena y la atención excelente."
+                        </p>
+                        <div class="d-flex align-items-center mt-3">
+                            <img src="https://via.placeholder.com/50" alt="User" class="rounded-circle me-3">
+                            <div>
+                                <h6 class="mb-0">Lorena G.</h6>
+                                <small class="text-muted">11 nov, 2024</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Testimonio 3 -->
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <p class="card-text text-muted">
+                            <i class="bi bi-quote fs-2 text-warning"></i> 
+                            "La comida estuvo muy rica, y la atención del personal fue excepcional."
+                        </p>
+                        <div class="d-flex align-items-center mt-3">
+                            <img src="https://via.placeholder.com/50" alt="User" class="rounded-circle me-3">
+                            <div>
+                                <h6 class="mb-0">Junior G.</h6>
+                                <small class="text-muted">3 nov, 2024</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 
     <!-- Footer -->
     <footer class="text-center">
