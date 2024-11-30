@@ -64,7 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $celular = $_POST['celular'];
     $pais = $_POST['pais'];
 
-    // Calcular el total de la reserva
     $total_pago = 0;
     foreach ($habitaciones_info as $habitacion) {
         $total_pago += $habitacion['precio_base'] * $dias_estadia;
@@ -84,10 +83,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fecha_reserva = date('Y-m-d H:i:s'); // Fecha actual
     $id_promocion = null; // Asumimos sin promociones
     $id_hotel = 1; // Asumimos un hotel por defecto
+
+    //calculo del total
+    $total = 0;
+foreach ($cuartos_seleccionados as $cuarto) {
+    $id_cuarto = $cuarto['id_cuarto'];
+    $tipo_pago = $cuarto['tipo_pago'];
+
+    // Obtener el número de la habitación y el precio base desde la base de datos
+    $precio_base = 0;
+    $numero_cuarto = '';
+    foreach ($habitaciones_info as $habitacion) {
+        if ($habitacion['id_cuarto'] == $id_cuarto) {
+            $precio_base = $habitacion['precio_base'];
+            $numero_cuarto = $habitacion['numero']; // Guardar el número de la habitación
+            break;
+        }
+    }
+
+    // Calcular el subtotal, aplicando el descuento si es pago por web
+    $precio_ajustado = ($tipo_pago === 'web') ? $precio_base * 0.7 : $precio_base;
+    $subtotal = $precio_ajustado * $dias_estadia;
+    $total += $subtotal;
+}
+
     $query_reserva = "
-        INSERT INTO reservas (fecha_reserva, fecha_checkin, fecha_checkout, total_pago, id_cliente, id_promocion, id_hotel)
-        VALUES ('$fecha_reserva', '$check_in', '$check_out', $total_pago, $id_cliente, " . ($id_promocion ? $id_promocion : 'NULL') . ", $id_hotel)
+    INSERT INTO reservas (fecha_reserva, fecha_checkin, fecha_checkout, total_pago, id_cliente, id_promocion, id_hotel)
+    VALUES ('$fecha_reserva', '$check_in', '$check_out', $total, $id_cliente, " . ($id_promocion ? $id_promocion : 'NULL') . ", $id_hotel)
     ";
+
     if (!$conn->query($query_reserva)) {
         die("Error al guardar la reserva: " . $conn->error);
     }
@@ -126,15 +150,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h2>Días de Estadía: <?php echo htmlspecialchars($dias_estadia); ?></h2>
 
     <!-- Mostrar las habitaciones seleccionadas -->
-    <h2>Habitaciones Seleccionadas:</h2>
-    <ul>
-        <?php foreach ($habitaciones_info as $habitacion): ?>
-            <li>
-                Habitación <?php echo htmlspecialchars($habitacion['numero']); ?> - 
-                Costo por noche: <?php echo htmlspecialchars($habitacion['precio_base']); ?> USD
-            </li>
-        <?php endforeach; ?>
-    </ul>
+<h2>Habitaciones Seleccionadas:</h2>
+<ul>
+    <?php foreach ($cuartos_seleccionados as $cuarto): ?>
+        <?php
+        $id_cuarto = $cuarto['id_cuarto'];
+        $tipo_pago = $cuarto['tipo_pago'];
+
+        // Obtener el número de la habitación y el precio base
+        $precio_base = 0;
+        $numero_cuarto = '';
+        foreach ($habitaciones_info as $habitacion) {
+            if ($habitacion['id_cuarto'] == $id_cuarto) {
+                $precio_base = $habitacion['precio_base'];
+                $numero_cuarto = $habitacion['numero']; // Guardar el número de la habitación
+                break;
+            }
+        }
+
+        // Calcular el precio ajustado si el tipo de pago es "web"
+        $precio_ajustado = ($tipo_pago === 'web') ? $precio_base * 0.7 : $precio_base;
+        ?>
+
+        <li>
+            Habitación <?php echo htmlspecialchars($numero_cuarto); ?> - 
+            Costo por noche: <?php echo htmlspecialchars($precio_base); ?> USD
+            <?php if ($tipo_pago === 'web'): ?>
+                (Precio con descuento: <?php echo htmlspecialchars($precio_ajustado); ?> USD)
+            <?php endif; ?>
+        </li>
+    <?php endforeach; ?>
+</ul>
+
+
 
     <!-- Formulario para los datos del cliente -->
     <form action="pagoh.php" method="POST">
@@ -363,16 +411,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <br><br>
         <!-- Resumen -->
         <h2>Resumen:</h2>
-        <?php
-        $total = 0;
-        foreach ($habitaciones_info as $habitacion) {
-            $subtotal = $habitacion['precio_base'] * $dias_estadia;
-            echo "<p>Habitación {$habitacion['numero']}: $subtotal USD</p>";
-            $total += $subtotal;
+<?php
+$total = 0;
+foreach ($cuartos_seleccionados as $cuarto) {
+    $id_cuarto = $cuarto['id_cuarto'];
+    $tipo_pago = $cuarto['tipo_pago'];
+
+    // Obtener el número de la habitación y el precio base desde la base de datos
+    $precio_base = 0;
+    $numero_cuarto = '';
+    foreach ($habitaciones_info as $habitacion) {
+        if ($habitacion['id_cuarto'] == $id_cuarto) {
+            $precio_base = $habitacion['precio_base'];
+            $numero_cuarto = $habitacion['numero']; // Guardar el número de la habitación
+            break;
         }
-        ?>
+    }
+
+    // Calcular el subtotal, aplicando el descuento si es pago por web
+    $precio_ajustado = ($tipo_pago === 'web') ? $precio_base * 0.7 : $precio_base;
+    $subtotal = $precio_ajustado * $dias_estadia;
+
+    echo "<p>Habitación {$numero_cuarto}: $subtotal USD</p>";
+    $total += $subtotal;
+}
+?>
+
         <h3>Total: <?php echo htmlspecialchars($total); ?> USD</h3>
-        <br><br>
         <button type="submit">Proceder al Pago</button>
     </form>
 </body>
