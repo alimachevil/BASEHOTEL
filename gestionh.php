@@ -47,17 +47,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservar'])) {
         $id_cuarto = $_POST['id_cuarto'];
         $tipo_pago = $_POST['tipo_pago'];
 
-        // Guardar la habitación seleccionada
-        $_SESSION['cuartos_seleccionados'][] = [
-            'id_cuarto' => $id_cuarto,
-            'tipo_pago' => $tipo_pago,
-        ];
+        // Obtener el precio base de la habitación
+        $query_precio = "SELECT precio_base FROM cuartos WHERE id_cuarto = $id_cuarto";
+        $result_precio = $conn->query($query_precio);
+        if ($result_precio && $result_precio->num_rows > 0) {
+            $precio_base = $result_precio->fetch_assoc()['precio_base'];
+
+            // Calcular el precio ajustado
+            $precio_ajustado = ($tipo_pago === 'web') ? $precio_base * 0.7 : $precio_base;
+
+            // Guardar la información en la sesión
+            $_SESSION['cuartos_seleccionados'][] = [
+                'id_cuarto' => $id_cuarto,
+                'tipo_pago' => $tipo_pago,
+                'precio' => $precio_ajustado,
+            ];
+        }
 
         // Redirigir para evitar reenvío del formulario
         header('Location: gestionh.php');
         exit();
     }
 }
+
 
 // Consulta para obtener los cuartos disponibles
 $cuartos_disponibles = [];
