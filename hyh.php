@@ -2,6 +2,26 @@
 // Inicia la sesión
 session_start();
 
+// Verificar si el parámetro 'clear_session' está presente en la URL
+if (isset($_GET['clear_session']) && $_GET['clear_session'] == 'true') {
+    // Guardamos las variables de sesión que deseas conservar
+    $check_in = $_SESSION['check_in'];
+    $check_out = $_SESSION['check_out'];
+    $habitaciones = $_SESSION['habitaciones'];
+    $adultos = $_SESSION['adultos'];
+    $ninos = $_SESSION['ninos'];
+
+    // Limpiar todas las demás variables de sesión
+    session_unset(); // Esto borra todas las variables de sesión
+
+    // Restaurar las variables de sesión que queremos conservar
+    $_SESSION['check_in'] = $check_in;
+    $_SESSION['check_out'] = $check_out;
+    $_SESSION['habitaciones'] = $habitaciones;
+    $_SESSION['adultos'] = $adultos;
+    $_SESSION['ninos'] = $ninos;
+}
+
 // Función para formatear la fecha
 function formatearFecha($fecha) {
     setlocale(LC_TIME, 'es_ES.UTF-8');
@@ -179,7 +199,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Barra de Progreso -->
     <div class="progress-bar-container">
-        <h1 class="progress-bar-header">Casa Andina Standard Talara</h1>
         <div class="progress-bar">
             <div class="step">
                 <div class="step-circle active" id="circle-1">1</div>
