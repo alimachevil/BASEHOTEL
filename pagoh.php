@@ -141,304 +141,328 @@ foreach ($cuartos_seleccionados as $cuarto) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pago de Reserva</title>
+    <title>Gestión de Habitaciones</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lato', 'Roboto', sans-serif !important;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+        }
+        .header-container {
+            width: 100%;
+            max-width: 1140px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            height: 69px;
+        }
+        .header-left img {
+            height: 50px;
+        }
+        .header-right nav {
+            display: flex;
+            gap: 20px;
+        }
+        .header-right nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .header-right nav a:hover {
+            text-decoration: underline;
+        }
+
+        .progress-bar-container {
+            padding: 11px 15px;
+            max-width: 1140px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .progress-bar-header {
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .step {
+            text-align: center;
+            flex: 1;
+        }
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            color: black;
+            font-weight: bold;
+        }
+        .step-circle.active {
+            background-color: #D69C4F;
+        }
+        .step-line {
+            flex: 1;
+            height: 2px;
+            background-color: #ccc;
+            margin: auto;
+        }
+        .step-line.active {
+            background-color: #D69C4F;
+        }
+
+        .container {
+            margin: 20px auto;
+            max-width: 1200px;
+            padding: 0 40px 40px 40px;
+        }
+        h2 {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .form-section {
+            background-color: transparent;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .form-label {
+            font-weight: bold;
+        }
+
+        /* Estilo del Select de Monedas */
+        .form-select {
+            border: none;
+            border-bottom: 2px solid #000;
+            background-color: transparent;
+            box-shadow: none;
+            padding-left: 0;
+            font-weight: bold;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-bottom: 2px solid #D69C4F;
+        }
+
+        /* Estilo del contenedor de cada habitación */
+        .habitacion-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .habitacion-info {
+            flex-basis: 70%;
+        }
+
+        .habitacion-info img {
+            height: px;
+            width: auto;
+        }
+
+        .habitacion-options {
+            flex-basis: 28%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .habitacion-options p {
+            margin: 5px 0;
+        }
+
+        .btn-warning {
+            background-color: #D69C4F;
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-warning:hover {
+            background-color: #c88942;
+        }
+
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .section {
+            flex: 1;
+            min-width: 300px;
+        }
+        .section h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .reservation-details,
+        .guest-info,
+        .payment-info {
+            padding: 10px;
+        }
+        .reservation-details p,
+        .guest-info label,
+        .payment-info label {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .guest-info input,
+        .payment-info input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .payment-info {
+            text-align: center;
+        }
+        .payment-info img {
+            width: 50px;
+            margin: 5px;
+        }
+        .total {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ff8000;
+            text-align: right;
+            margin-top: 10px;
+        }
+        button {
+            background-color: #ff8000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #e06900;
+        }
+    </style>
 </head>
 <body>
-    <h1>Pago de Reserva</h1>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="header-left">
+                <img src="images/logo.png" alt="Logo del Hotel">
+            </div>
+            <div class="header-right">
+                <nav>
+                    <a href="#">OFERTAS</a>
+                    <a href="#">DESTINOS</a>
+                    <a href="#">LIFE</a>
+                    <a href="#">RESTAURANTES</a>
+                </nav>
+            </div>
+        </div>
+    </header>
 
-    <!-- Mostrar los días de estadía -->
-    <h2>Días de Estadía: <?php echo htmlspecialchars($dias_estadia); ?></h2>
+    <!-- Barra de Progreso -->
+    <div class="progress-bar-container">
+        <h1 class="progress-bar-header">Casa Andina Standard Talara</h1>
+        <div class="progress-bar">
+            <div class="step">
+                <div class="step-circle active" id="circle-1">1</div>
+                <div>Huéspedes & Habitaciones</div>
+            </div>
+            <div class="step-line active" id="line-1"></div>
+            <div class="step">
+                <div class="step-circle active" id="circle-2">2</div>
+                <div>Selecciona Habitaciones y Tarifa</div>
+            </div>
+            <div class="step-line active" id="line-2"></div>
+            <div class="step">
+                <div class="step-circle active" id="circle-3">3</div>
+                <div>Fechas de Reserva Restaurante</div>
+            </div>
+            <div class="step-line active" id="line-3"></div>
+            <div class="step">
+                <div class="step-circle active" id="circle-4">4</div>
+                <div>Monto Total</div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Mostrar las habitaciones seleccionadas -->
-<h2>Habitaciones Seleccionadas:</h2>
-<ul>
-    <?php foreach ($cuartos_seleccionados as $cuarto): ?>
-        <?php
-        $id_cuarto = $cuarto['id_cuarto'];
-        $tipo_pago = $cuarto['tipo_pago'];
-
-        // Obtener el número de la habitación y el precio base
-        $precio_base = 0;
-        $numero_cuarto = '';
-        foreach ($habitaciones_info as $habitacion) {
-            if ($habitacion['id_cuarto'] == $id_cuarto) {
-                $precio_base = $habitacion['precio_base'];
-                $numero_cuarto = $habitacion['numero']; // Guardar el número de la habitación
-                break;
-            }
-        }
-
-        // Calcular el precio ajustado si el tipo de pago es "web"
-        $precio_ajustado = ($tipo_pago === 'web') ? $precio_base * 0.7 : $precio_base;
-        ?>
-
-        <li>
-            Habitación <?php echo htmlspecialchars($numero_cuarto); ?> - 
-            Costo por noche: <?php echo htmlspecialchars($precio_base); ?> USD
-            <?php if ($tipo_pago === 'web'): ?>
-                (Precio con descuento: <?php echo htmlspecialchars($precio_ajustado); ?> USD)
-            <?php endif; ?>
-        </li>
-    <?php endforeach; ?>
-</ul>
-
-
-
-    <!-- Formulario para los datos del cliente -->
-    <form action="pagoh.php" method="POST">
-    <h2>Datos del Cliente:</h2>
-    <form action="pagoh.php" method="POST">
-        <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" name="nombre" required>
-        <br><br>
-        
-        <label for="apellido">Apellido:</label>
-        <input type="text" id="apellido" name="apellido" required>
-        <br><br>
-        
-        <label for="tipo_documento">Tipo de Documento:</label>
-        <select id="tipo_documento" name="tipo_documento" required>
-            <option value="DNI">DNI</option>
-            <option value="Pasaporte">Pasaporte</option>
-            <option value="Otro">Otro</option>
-        </select>
-        <br><br>
-        
-        <label for="nro_documento">Número de Documento:</label>
-        <input type="text" id="nro_documento" name="nro_documento" required>
-        <br><br>
-        
-        <label for="correo">Correo Electrónico:</label>
-        <input type="email" id="correo" name="correo" required>
-        <br><br>
-        
-        <label for="celular">Celular:</label>
-        <input type="text" id="celular" name="celular" required>
-        <br><br>
-        
-        <label for="pais">País:</label>
-<select id="pais" name="pais" required>
-    <option value="">Selecciona un país</option>
-    <option value="Afganistán">Afganistán</option>
-    <option value="Albania">Albania</option>
-    <option value="Alemania">Alemania</option>
-    <option value="Andorra">Andorra</option>
-    <option value="Angola">Angola</option>
-    <option value="Antigua y Barbuda">Antigua y Barbuda</option>
-    <option value="Arabia Saudita">Arabia Saudita</option>
-    <option value="Argelia">Argelia</option>
-    <option value="Argentina">Argentina</option>
-    <option value="Armenia">Armenia</option>
-    <option value="Australia">Australia</option>
-    <option value="Austria">Austria</option>
-    <option value="Azerbaiyán">Azerbaiyán</option>
-    <option value="Bahamas">Bahamas</option>
-    <option value="Bangladesh">Bangladesh</option>
-    <option value="Baréin">Baréin</option>
-    <option value="Bélgica">Bélgica</option>
-    <option value="Belice">Belice</option>
-    <option value="Benín">Benín</option>
-    <option value="Bielorrusia">Bielorrusia</option>
-    <option value="Bolivia">Bolivia</option>
-    <option value="Bosnia y Herzegovina">Bosnia y Herzegovina</option>
-    <option value="Botsuana">Botsuana</option>
-    <option value="Brasil">Brasil</option>
-    <option value="Brunéi">Brunéi</option>
-    <option value="Bulgaria">Bulgaria</option>
-    <option value="Burkina Faso">Burkina Faso</option>
-    <option value="Burundi">Burundi</option>
-    <option value="Bután">Bután</option>
-    <option value="Cabo Verde">Cabo Verde</option>
-    <option value="Camboya">Camboya</option>
-    <option value="Camerún">Camerún</option>
-    <option value="Canadá">Canadá</option>
-    <option value="Catar">Catar</option>
-    <option value="Colombia">Colombia</option>
-    <option value="Comoras">Comoras</option>
-    <option value="Congo">Congo</option>
-    <option value="Congo (República Democrática del)">Congo (República Democrática del)</option>
-    <option value="Corea del Norte">Corea del Norte</option>
-    <option value="Corea del Sur">Corea del Sur</option>
-    <option value="Costa de Marfil">Costa de Marfil</option>
-    <option value="Costa Rica">Costa Rica</option>
-    <option value="Croacia">Croacia</option>
-    <option value="Cuba">Cuba</option>
-    <option value="Chipre">Chipre</option>
-    <option value="Chequia">Chequia</option>
-    <option value="Dinamarca">Dinamarca</option>
-    <option value="Dominica">Dominica</option>
-    <option value="Ecuador">Ecuador</option>
-    <option value="Egipto">Egipto</option>
-    <option value="El Salvador">El Salvador</option>
-    <option value="Emiratos Árabes Unidos">Emiratos Árabes Unidos</option>
-    <option value="Eslovaquia">Eslovaquia</option>
-    <option value="Eslovenia">Eslovenia</option>
-    <option value="España">España</option>
-    <option value="Estados Unidos">Estados Unidos</option>
-    <option value="Estonia">Estonia</option>
-    <option value="Etiopía">Etiopía</option>
-    <option value="Fiji">Fiji</option>
-    <option value="Filipinas">Filipinas</option>
-    <option value="Finlandia">Finlandia</option>
-    <option value="Francia">Francia</option>
-    <option value="Gabón">Gabón</option>
-    <option value="Gambia">Gambia</option>
-    <option value="Georgia">Georgia</option>
-    <option value="Ghana">Ghana</option>
-    <option value="Granada">Granada</option>
-    <option value="Grecia">Grecia</option>
-    <option value="Guatemala">Guatemala</option>
-    <option value="Guinea">Guinea</option>
-    <option value="Guinea Ecuatorial">Guinea Ecuatorial</option>
-    <option value="Guinea-Bisáu">Guinea-Bisáu</option>
-    <option value="Guyana">Guyana</option>
-    <option value="Haití">Haití</option>
-    <option value="Honduras">Honduras</option>
-    <option value="Hungría">Hungría</option>
-    <option value="India">India</option>
-    <option value="Indonesia">Indonesia</option>
-    <option value="Irak">Irak</option>
-    <option value="Irlanda">Irlanda</option>
-    <option value="Irán">Irán</option>
-    <option value="Isla de Man">Isla de Man</option>
-    <option value="Islandia">Islandia</option>
-    <option value="Islas Marshall">Islas Marshall</option>
-    <option value="Islas Salomón">Islas Salomón</option>
-    <option value="Israel">Israel</option>
-    <option value="Italia">Italia</option>
-    <option value="Jamaica">Jamaica</option>
-    <option value="Japón">Japón</option>
-    <option value="Jordania">Jordania</option>
-    <option value="Kazajistán">Kazajistán</option>
-    <option value="Kenia">Kenia</option>
-    <option value="Kirguistán">Kirguistán</option>
-    <option value="Kiribati">Kiribati</option>
-    <option value="Kuwait">Kuwait</option>
-    <option value="Laos">Laos</option>
-    <option value="Lesoto">Lesoto</option>
-    <option value="Letonia">Letonia</option>
-    <option value="Líbano">Líbano</option>
-    <option value="Liberia">Liberia</option>
-    <option value="Libia">Libia</option>
-    <option value="Liechtenstein">Liechtenstein</option>
-    <option value="Lituania">Lituania</option>
-    <option value="Luxemburgo">Luxemburgo</option>
-    <option value="Madagascar">Madagascar</option>
-    <option value="Malasia">Malasia</option>
-    <option value="Malaui">Malaui</option>
-    <option value="Maldivas">Maldivas</option>
-    <option value="Malí">Malí</option>
-    <option value="Malta">Malta</option>
-    <option value="Marruecos">Marruecos</option>
-    <option value="Mauricio">Mauricio</option>
-    <option value="Mauritania">Mauritania</option>
-    <option value="México">México</option>
-    <option value="Micronesia">Micronesia</option>
-    <option value="Mónaco">Mónaco</option>
-    <option value="Mongolia">Mongolia</option>
-    <option value="Mozambique">Mozambique</option>
-    <option value="Namibia">Namibia</option>
-    <option value="Naurú">Naurú</option>
-    <option value="Nepal">Nepal</option>
-    <option value="Nicaragua">Nicaragua</option>
-    <option value="Níger">Níger</option>
-    <option value="Nigeria">Nigeria</option>
-    <option value="Noruega">Noruega</option>
-    <option value="Nueva Zelanda">Nueva Zelanda</option>
-    <option value="Omán">Omán</option>
-    <option value="Países Bajos">Países Bajos</option>
-    <option value="Pakistán">Pakistán</option>
-    <option value="Palaos">Palaos</option>
-    <option value="Panamá">Panamá</option>
-    <option value="Papúa Nueva Guinea">Papúa Nueva Guinea</option>
-    <option value="Paraguay">Paraguay</option>
-    <option value="Perú">Perú</option>
-    <option value="Polonia">Polonia</option>
-    <option value="Portugal">Portugal</option>
-    <option value="Reino Unido">Reino Unido</option>
-    <option value="República Checa">República Checa</option>
-    <option value="República Dominicana">República Dominicana</option>
-    <option value="Ruanda">Ruanda</option>
-    <option value="Rumanía">Rumanía</option>
-    <option value="Rusia">Rusia</option>
-    <option value="Samoa">Samoa</option>
-    <option value="San Cristóbal y Nieves">San Cristóbal y Nieves</option>
-    <option value="San Marino">San Marino</option>
-    <option value="Santo Tomé y Príncipe">Santo Tomé y Príncipe</option>
-    <option value="Senegal">Senegal</option>
-    <option value="Serbia">Serbia</option>
-    <option value="Seychelles">Seychelles</option>
-    <option value="Sierra Leona">Sierra Leona</option>
-    <option value="Singapur">Singapur</option>
-    <option value="Siria">Siria</option>
-    <option value="Somalia">Somalia</option>
-    <option value="Sri Lanka">Sri Lanka</option>
-    <option value="Suazilandia">Suazilandia</option>
-    <option value="Sudáfrica">Sudáfrica</option>
-    <option value="Sudán">Sudán</option>
-    <option value="Sudán del Sur">Sudán del Sur</option>
-    <option value="Suecia">Suecia</option>
-    <option value="Suiza">Suiza</option>
-    <option value="Surinam">Surinam</option>
-    <option value="Siria">Siria</option>
-    <option value="Somalia">Somalia</option>
-    <option value="Sri Lanka">Sri Lanka</option>
-    <option value="Tailandia">Tailandia</option>
-    <option value="Tanzania">Tanzania</option>
-    <option value="Tayikistán">Tayikistán</option>
-    <option value="Timor Oriental">Timor Oriental</option>
-    <option value="Togo">Togo</option>
-    <option value="Tonga">Tonga</option>
-    <option value="Trinidad y Tobago">Trinidad y Tobago</option>
-    <option value="Túnez">Túnez</option>
-    <option value="Turkmenistán">Turkmenistán</option>
-    <option value="Turquía">Turquía</option>
-    <option value="Tuvalu">Tuvalu</option>
-    <option value="Uganda">Uganda</option>
-    <option value="Ucrania">Ucrania</option>
-    <option value="Uruguay">Uruguay</option>
-    <option value="Uzbekistán">Uzbekistán</option>
-    <option value="Vanuatu">Vanuatu</option>
-    <option value="Vaticano">Vaticano</option>
-    <option value="Venezuela">Venezuela</option>
-    <option value="Vietnam">Vietnam</option>
-    <option value="Yemen">Yemen</option>
-    <option value="Yibuti">Yibuti</option>
-    <option value="Zambia">Zambia</option>
-    <option value="Zimbabue">Zimbabue</option>
-</select>
-
-        <br><br>
-        <!-- Resumen -->
-        <h2>Resumen:</h2>
-<?php
-$total = 0;
-foreach ($cuartos_seleccionados as $cuarto) {
-    $id_cuarto = $cuarto['id_cuarto'];
-    $tipo_pago = $cuarto['tipo_pago'];
-
-    // Obtener el número de la habitación y el precio base desde la base de datos
-    $precio_base = 0;
-    $numero_cuarto = '';
-    foreach ($habitaciones_info as $habitacion) {
-        if ($habitacion['id_cuarto'] == $id_cuarto) {
-            $precio_base = $habitacion['precio_base'];
-            $numero_cuarto = $habitacion['numero']; // Guardar el número de la habitación
-            break;
-        }
-    }
-
-    // Calcular el subtotal, aplicando el descuento si es pago por web
-    $precio_ajustado = ($tipo_pago === 'web') ? $precio_base * 0.7 : $precio_base;
-    $subtotal = $precio_ajustado * $dias_estadia;
-
-    echo "<p>Habitación {$numero_cuarto}: $subtotal USD</p>";
-    $total += $subtotal;
-}
-?>
-
-        <h3>Total: <?php echo htmlspecialchars($total); ?> USD</h3>
-        <button type="submit">Proceder al Pago</button>
-    </form>
+    <!-- Contenido -->
+    <div class="container">
+        <!-- Detalles de la reserva -->
+        <div class="section reservation-details">
+            <h3>Su Reserva</h3>
+            <p><strong>Habitación Superior Doble - 1 habitación</strong></p>
+            <p>1 noche, 2 adultos</p>
+            <p><strong>Subtotal:</strong> S/ 371.39</p>
+            <p><strong>Cargo por servicios (10%):</strong> S/ 37.14</p>
+            <div class="total"><strong>Total: S/ 408.53</strong></div>
+        </div>
+        <!-- Información del huésped -->
+        <div class="section guest-info">
+            <h3>Información del huésped</h3>
+            <label>Nombre:</label>
+            <input type="text" placeholder="Ingresa tu nombre">
+            <label>Apellido:</label>
+            <input type="text" placeholder="Ingresa tu apellido">
+            <label>Dirección de correo electrónico:</label>
+            <input type="email" placeholder="Ingresa tu correo">
+            <label>¿Eres un agente de viajes?</label>
+            <input type="checkbox"> Sí
+        </div>
+        <!-- Información de pago -->
+        <div class="section payment-info">
+            <h3>Modo de Pago</h3>
+            <label>Nombre en la tarjeta:</label>
+            <input type="text" placeholder="Nombre del titular">
+            <label>Número de tarjeta:</label>
+            <input type="text" placeholder="XXXX-XXXX-XXXX-XXXX">
+            <label>Fecha de expiración:</label>
+            <input type="text" placeholder="MM/AA">
+            <label>CVC:</label>
+            <input type="text" placeholder="Código de seguridad">
+            <p>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Visa_2014.svg" alt="Visa">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/fb/Mastercard-logo.svg" alt="MasterCard">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Amex-logo.png" alt="Amex">
+            </p>
+            <button>Proceder al Pago</button>
+        </div>
+    </div>
 </body>
-</html>
+</html> 
