@@ -44,7 +44,6 @@ if ($result->num_rows > 0) {
     exit();
 }
 
-// Manejo del formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['huéspedes'])) {
         $huespedes = $_POST['huéspedes'];
@@ -68,15 +67,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     // Validar que todos los campos requeridos estén completos
                     if ($nombre && $apellido && $tipo_documento && $nro_documento && $pais) {
-                        // Insertar en la tabla acompañantes
-                        $query_acompanante = "
+                        // Preparar la consulta
+                        $stmt = $conn->prepare("
                             INSERT INTO acompañantes (nombre, apellido, tipo_documento, nro_documento, celular, pais, correo, id_reserva)
-                            VALUES ('$nombre', '$apellido', '$tipo_documento', '$nro_documento', " . 
-                            ($celular ? "'$celular'" : "NULL") . ", '$pais', " . 
-                            ($correo ? "'$correo'" : "NULL") . ", $id_reserva)
-                        ";
-                        if (!$conn->query($query_acompanante)) {
-                            throw new Exception("Error al guardar acompañante: " . $conn->error);
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        ");
+                        $stmt->bind_param(
+                            "sssssssi",
+                            $nombre,
+                            $apellido,
+                            $tipo_documento,
+                            $nro_documento,
+                            $celular,
+                            $pais,
+                            $correo,
+                            $id_reserva
+                        );
+
+                        // Ejecutar la consulta
+                        if (!$stmt->execute()) {
+                            throw new Exception("Error al guardar acompañante: " . $stmt->error);
                         }
                     } else {
                         throw new Exception("Datos incompletos para el huésped en habitación $habitacionId.");
@@ -88,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn->commit();
 
             // Redirigir a una página de confirmación
-            header('Location: confirmacion_huespedes.php');
+            header('Location: confirmacion_huespedes1.php');
             exit();
         } catch (Exception $e) {
             // Si hay un error, hacer rollback
@@ -97,6 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
 
 ?>
 
@@ -136,38 +147,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
     <script>
-        // Añadir nuevo formulario de huésped
-        function añadirHuesped(habitacionId) {
-            const container = document.getElementById(`habitacion-${habitacionId}`);
-            const maxFormularios = parseInt(container.dataset.maxFormularios);
-            const formulariosActuales = container.querySelectorAll('.huesped-form').length;
+    // Añadir nuevo formulario de huésped
+    function añadirHuesped(habitacionId) {
+        const container = document.getElementById(`habitacion-${habitacionId}`);
+        const maxFormularios = parseInt(container.dataset.maxFormularios);
+        const formulariosActuales = container.querySelectorAll('.huesped-form').length;
 
-            if (formulariosActuales < maxFormularios) {
-                const formularioBase = container.querySelector('.huesped-form:first-child');
-                const nuevoFormulario = formularioBase.cloneNode(true);
+        if (formulariosActuales < maxFormularios) {
+            const formularioBase = container.querySelector('.huesped-form:first-child');
+            const nuevoFormulario = formularioBase.cloneNode(true);
 
-                // Limpiar campos
-                nuevoFormulario.querySelectorAll('input, select').forEach(input => {
-                    input.value = '';
-                });
+            // Incrementar índice dinámico
+            const nuevoIndice = formulariosActuales;
+            nuevoFormulario.querySelectorAll('input, select').forEach((input) => {
+                const name = input.name;
+                if (name) {
+                    input.name = name.replace(/\[\d+\]/, `[${nuevoIndice}]`);
+                    input.value = ''; // Limpiar valor
+                }
+            });
 
-                container.appendChild(nuevoFormulario);
-            } else {
-                alert('Se ha alcanzado el límite de huéspedes para esta habitación.');
-            }
+            container.appendChild(nuevoFormulario);
+        } else {
+            alert('Se ha alcanzado el límite de huéspedes para esta habitación.');
         }
+    }
 
-        // Eliminar último formulario añadido
-        function quitarUltimoHuesped(habitacionId) {
-            const container = document.getElementById(`habitacion-${habitacionId}`);
-            const formularios = container.querySelectorAll('.huesped-form');
-            if (formularios.length > 1) {
-                formularios[formularios.length - 1].remove();
-            } else {
-                alert('Debe haber al menos un formulario por habitación.');
-            }
+    // Eliminar último formulario añadido
+    function quitarUltimoHuesped(habitacionId) {
+        const container = document.getElementById(`habitacion-${habitacionId}`);
+        const formularios = container.querySelectorAll('.huesped-form');
+        if (formularios.length > 1) {
+            formularios[formularios.length - 1].remove();
+        } else {
+            alert('Debe haber al menos un formulario por habitación.');
         }
-    </script>
+    }
+</script>
 </head>
 <body>
     <h1>Registro de Huéspedes</h1>
