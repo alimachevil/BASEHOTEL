@@ -47,7 +47,7 @@ $cuartos_seleccionados = $_SESSION['cuartos_seleccionados'];
 
 // Redirigir al pago si ya se alcanzó el límite
 if (count($cuartos_seleccionados) >= $habitaciones) {
-    header('Location: pagoh.php');
+    header('Location: reserva_restaurante.php');
     exit();
 }
 
@@ -514,115 +514,112 @@ for ($i = 0; $i < $habitaciones; $i++) {
 
     <!-- Barra de Progreso -->
     <div class="progress-bar-container">
-    <div class="progress-bar">
-        <div class="step" onclick="clearSessionAndRedirect()">
-            <div class="step-circle active" id="circle-1">1</div>
-            <div>Huéspedes & Habitaciones</div>
-        </div>
-        <div class="step-line active" id="line-1"></div>
-        <div class="step">
-            <div class="step-circle active" id="circle-2">2</div>
-            <div>Selecciona Habitaciones y Tarifa</div>
-        </div>
-        <div class="step-line" id="line-2"></div>
-        <div class="step">
-            <div class="step-circle" id="circle-3">3</div>
-            <div>Fechas de Reserva Restaurante</div>
-        </div>
-        <div class="step-line" id="line-3"></div>
-        <div class="step">
-            <div class="step-circle" id="circle-4">4</div>
-            <div>Monto Total</div>
+        <div class="progress-bar">
+            <div class="step" onclick="clearSessionAndRedirect()">
+                <div class="step-circle active" id="circle-1">1</div>
+                <div>Huéspedes & Habitaciones</div>
+            </div>
+            <div class="step-line active" id="line-1"></div>
+            <div class="step">
+                <div class="step-circle active" id="circle-2">2</div>
+                <div>Selecciona Habitaciones y Tarifa</div>
+            </div>
+            <div class="step-line" id="line-2"></div>
+            <div class="step">
+                <div class="step-circle" id="circle-3">3</div>
+                <div>Fechas de Reserva Restaurante</div>
+            </div>
+            <div class="step-line" id="line-3"></div>
+            <div class="step">
+                <div class="step-circle" id="circle-4">4</div>
+                <div>Monto Total</div>
+            </div>
         </div>
     </div>
-</div>
-
     
-<!-- Contenedor de la ventana emergente (popup) -->
-<div id="habitaciones-popup" class="popup-container">
-    <div class="popup-content">
-        <h2 >Habitaciones Seleccionadas</h2>
-        
-        <!-- Contenedor de habitaciones seleccionadas en formato tarjeta -->
-        <div class="habitaciones-container">
-            <?php 
-            // Inicializamos un contador para el número de la habitación
-            $habitacion_numero = 1;
+    <!-- Contenedor de la ventana emergente (popup) -->
+    <div id="habitaciones-popup" class="popup-container">
+        <div class="popup-content">
+            <h2 >Habitaciones Seleccionadas</h2>
+            
+            <!-- Contenedor de habitaciones seleccionadas en formato tarjeta -->
+            <div class="habitaciones-container">
+                <?php 
+                // Inicializamos un contador para el número de la habitación
+                $habitacion_numero = 1;
 
-            // Recorremos las habitaciones seleccionadas
-            foreach ($cuartos_seleccionados as $seleccion): 
-                // Realizamos una consulta para obtener los detalles de la habitación según el id_cuarto
-                $id_cuarto = (int) $seleccion['id_cuarto']; // Aseguramos que id_cuarto es un número entero
-                $query = "
-                    SELECT h.id_cuarto, h.numero, h.piso, h.capacidad_adultos, h.capacidad_niños, h.descripcion, h.precio_base, t.nombre AS tipo_cuarto
-                    FROM cuartos h
-                    JOIN tipo_cuarto t ON h.id_tipo = t.id_tipo
-                    WHERE h.id_cuarto = $id_cuarto
-                ";
+                // Recorremos las habitaciones seleccionadas
+                foreach ($cuartos_seleccionados as $seleccion): 
+                    // Realizamos una consulta para obtener los detalles de la habitación según el id_cuarto
+                    $id_cuarto = (int) $seleccion['id_cuarto']; // Aseguramos que id_cuarto es un número entero
+                    $query = "
+                        SELECT h.id_cuarto, h.numero, h.piso, h.capacidad_adultos, h.capacidad_niños, h.descripcion, h.precio_base, t.nombre AS tipo_cuarto
+                        FROM cuartos h
+                        JOIN tipo_cuarto t ON h.id_tipo = t.id_tipo
+                        WHERE h.id_cuarto = $id_cuarto
+                    ";
 
-                // Usamos $conn para la conexión, que es el objeto de conexión creado con mysqli
-                $resultado = $conn->query($query); // $conn es el objeto de conexión
-                
-                // Verificamos si la habitación existe
-                if ($resultado && $resultado->num_rows > 0) {
-                    $cuarto = $resultado->fetch_assoc(); // Extraemos los datos de la habitación
-            ?>
-                <div class="habitacion-card">
-                    <div class="habitacion-info">
-                        <!-- Modificamos el título con el número de habitación y el total -->
-                        <h3>Habitación <?php echo $habitacion_numero; ?> de <?php echo $habitaciones; ?></h3>
-                        <img src="images/habitacion1.jpg" alt="Imagen de la Habitación">
-                        <p><strong>Tipo de Habitación:</strong> <?php echo htmlspecialchars($cuarto['tipo_cuarto']); ?> #<?php echo htmlspecialchars($cuarto['numero']); ?></p>
-                        <p><strong>Pago: </strong>
-                            <?php 
-                                if ($seleccion['tipo_pago'] === 'hotel') {
-                                    echo 'En Hotel';
-                                } elseif ($seleccion['tipo_pago'] === 'web') {
-                                    echo 'Por Web';
-                                } elseif ($seleccion['tipo_pago'] === 'blackdays') {
-                                    echo 'Con oferta de Black Days';
-                                }
-                            ?>
-                        </p>
-                        <p><strong>Capacidad Adultos:</strong> <?php echo htmlspecialchars($cuarto['capacidad_adultos']); ?></p>
-                        <p><strong>Capacidad Niños:</strong> <?php echo htmlspecialchars($cuarto['capacidad_niños']); ?></p>
-                        <p><strong>Piso:</strong> <?php echo htmlspecialchars($cuarto['piso']); ?></p>
-                        <p>Disfruta de una experiencia diferente en un acogedor <?php echo htmlspecialchars($cuarto['descripcion']); ?> y otros servicios que te permitirán descansar plácidamente.</p>
-                    </div>
-                    <div class="habitacion-options">
-                        <form method="POST">
-                            <input type="hidden" name="id_cuarto" value="<?php echo htmlspecialchars($cuarto['id_cuarto']); ?>">
+                    // Usamos $conn para la conexión, que es el objeto de conexión creado con mysqli
+                    $resultado = $conn->query($query); // $conn es el objeto de conexión
+                    
+                    // Verificamos si la habitación existe
+                    if ($resultado && $resultado->num_rows > 0) {
+                        $cuarto = $resultado->fetch_assoc(); // Extraemos los datos de la habitación
+                ?>
+                    <div class="habitacion-card">
+                        <div class="habitacion-info">
+                            <!-- Modificamos el título con el número de habitación y el total -->
+                            <h3>Habitación <?php echo $habitacion_numero; ?> de <?php echo $habitaciones; ?></h3>
+                            <img src="images/habitacion1.jpg" alt="Imagen de la Habitación">
+                            <p><strong>Tipo de Habitación:</strong> <?php echo htmlspecialchars($cuarto['tipo_cuarto']); ?> #<?php echo htmlspecialchars($cuarto['numero']); ?></p>
+                            <p><strong>Pago: </strong>
+                                <?php 
+                                    if ($seleccion['tipo_pago'] === 'hotel') {
+                                        echo 'En Hotel';
+                                    } elseif ($seleccion['tipo_pago'] === 'web') {
+                                        echo 'Por Web';
+                                    } elseif ($seleccion['tipo_pago'] === 'blackdays') {
+                                        echo 'Con oferta de Black Days';
+                                    }
+                                ?>
+                            </p>
+                            <p><strong>Capacidad Adultos:</strong> <?php echo htmlspecialchars($cuarto['capacidad_adultos']); ?></p>
+                            <p><strong>Capacidad Niños:</strong> <?php echo htmlspecialchars($cuarto['capacidad_niños']); ?></p>
+                            <p><strong>Piso:</strong> <?php echo htmlspecialchars($cuarto['piso']); ?></p>
+                            <p>Disfruta de una experiencia diferente en un acogedor <?php echo htmlspecialchars($cuarto['descripcion']); ?> y otros servicios que te permitirán descansar plácidamente.</p>
+                        </div>
+                        <div class="habitacion-options">
+                            <form method="POST">
+                                <input type="hidden" name="id_cuarto" value="<?php echo htmlspecialchars($cuarto['id_cuarto']); ?>">
 
-                            <!-- Tipo de Pago -->
-                            <p class="form-label">Precio por noche</p>
-                            <p class="precio-noche"> <?php echo htmlspecialchars($seleccion['precio']); ?> x <?php echo $dias_estadia; ?> días</p> 
+                                <!-- Tipo de Pago -->
+                                <p class="form-label">Precio por noche</p>
+                                <p class="precio-noche"> <?php echo htmlspecialchars($seleccion['precio']); ?> x <?php echo $dias_estadia; ?> días</p> 
 
-                            <!-- Contenedor de pago y precio final -->
-                            <div class="payment-container">
-                                <!-- Monto final con fondo negro -->
-                                <div class="final-price1">
-                                    <strong>S/ <?php echo htmlspecialchars($seleccion['precio']* $dias_estadia); ?></strong>
+                                <!-- Contenedor de pago y precio final -->
+                                <div class="payment-container">
+                                    <!-- Monto final con fondo negro -->
+                                    <div class="final-price1">
+                                        <strong>S/ <?php echo htmlspecialchars($seleccion['precio']* $dias_estadia); ?></strong>
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            <?php 
-                    // Aumentamos el número de habitación
-                    $habitacion_numero++;
-                } else {
-                    echo "<p>Habitación no disponible.</p>"; // Si no se encuentra la habitación
-                }
-            endforeach; 
-            ?>
+                <?php 
+                        // Aumentamos el número de habitación
+                        $habitacion_numero++;
+                    } else {
+                        echo "<p>Habitación no disponible.</p>"; // Si no se encuentra la habitación
+                    }
+                endforeach; 
+                ?>
+            </div>
+
+            <!-- Botón de Cerrar el pop-up -->
+            <button id="close-popup" class="btn-warning">Cerrar</button>
         </div>
-
-        <!-- Botón de Cerrar el pop-up -->
-        <button id="close-popup" class="btn-warning">Cerrar</button>
     </div>
-</div>
-
-
 
     <!-- Contenido de la Página -->
     <div class="container">
