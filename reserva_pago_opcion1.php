@@ -23,16 +23,15 @@ if ($conn->connect_error) {
 
 // Manejo del formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     if (isset($_POST['huéspedes'])) {
         $huespedes = $_POST['huéspedes'];
-
-    // Recupera el ID de reserva desde la sesión
-    $id_reserva = $_SESSION['id_reserva'];
 
         // Iniciar transacción
         $conn->begin_transaction();
 
         try {
+            $id_reserva = $_SESSION['id_reserva'];
             // Iterar sobre las habitaciones
             foreach ($huespedes as $habitacionId => $huespedesHabitacion) {
                 // Iterar sobre los huéspedes de cada habitación
@@ -48,15 +47,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     // Validar que todos los campos requeridos estén completos
                     if ($nombre && $apellido && $tipo_documento && $nro_documento && $pais) {
-                        // Insertar en la tabla acompañantes
-                        $query_acompanante = "
+                        // Preparar la consulta
+                        $stmt = $conn->prepare("
                             INSERT INTO acompañantes (nombre, apellido, tipo_documento, nro_documento, celular, pais, correo, id_reserva)
-                            VALUES ('$nombre', '$apellido', '$tipo_documento', '$nro_documento', " . 
-                            ($celular ? "'$celular'" : "NULL") . ", '$pais', " . 
-                            ($correo ? "'$correo'" : "NULL") . ", $id_reserva)
-                        ";
-                        if (!$conn->query($query_acompanante)) {
-                            throw new Exception("Error al guardar acompañante: " . $conn->error);
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        ");
+                        $stmt->bind_param(
+                            "sssssssi",
+                            $nombre,
+                            $apellido,
+                            $tipo_documento,
+                            $nro_documento,
+                            $celular,
+                            $pais,
+                            $correo,
+                            $id_reserva
+                        );
+
+                        // Ejecutar la consulta
+                        if (!$stmt->execute()) {
+                            throw new Exception("Error al guardar acompañante: " . $stmt->error);
                         }
                     } else {
                         throw new Exception("Datos incompletos para el huésped en habitación $habitacionId.");
@@ -68,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn->commit();
 
             // Redirigir a una página de confirmación
-            header('Location: confirmacion_huespedes2.php');
+            header('Location: confirmacion_huespedes1.php');
             exit();
         } catch (Exception $e) {
             // Si hay un error, hacer rollback
@@ -77,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
 
 // Verifica si el código de la reserva fue enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['codigo_reserva'])) {
@@ -200,7 +211,7 @@ if ($result->num_rows > 0) {
         }
     </style>
     <script>
-        // Añadir nuevo formulario de huésped
+    // Añadir nuevo formulario de huésped
         function añadirHuesped(habitacionId) {
             const container = document.getElementById(`habitacion-${habitacionId}`);
             const maxFormularios = parseInt(container.dataset.maxFormularios);
@@ -210,9 +221,14 @@ if ($result->num_rows > 0) {
                 const formularioBase = container.querySelector('.huesped-form:first-child');
                 const nuevoFormulario = formularioBase.cloneNode(true);
 
-                // Limpiar campos
-                nuevoFormulario.querySelectorAll('input, select').forEach(input => {
-                    input.value = '';
+                // Incrementar índice dinámico
+                const nuevoIndice = formulariosActuales;
+                nuevoFormulario.querySelectorAll('input, select').forEach((input) => {
+                    const name = input.name;
+                    if (name) {
+                        input.name = name.replace(/\[\d+\]/, `[${nuevoIndice}]`);
+                        input.value = ''; // Limpiar valor
+                    }
                 });
 
                 container.appendChild(nuevoFormulario);

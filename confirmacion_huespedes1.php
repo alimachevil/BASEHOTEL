@@ -2,12 +2,6 @@
 // Inicia la sesión
 session_start();
 
-// Verifica si las reservas están confirmadas en la sesión
-if (!isset($_SESSION['cuartos_seleccionados']) || empty($_SESSION['cuartos_seleccionados'])) {
-    header('Location: index.php'); // Redirigir al inicio si no hay información
-    exit();
-}
-
 // Opcional: Limpiar la sesión para finalizar el flujo
 unset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['habitaciones'], $_SESSION['adultos'], $_SESSION['ninos'], $_SESSION['cuartos_seleccionados']);
 ?>
@@ -49,8 +43,7 @@ unset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['habitaciones'], 
 </head>
 <body>
     <h1>¡Reservas Confirmadas!</h1>
-    <p>Gracias por realizar su reserva con nosotros. Hemos confirmado los detalles de su estadía.</p>
-    <p>Si tiene alguna duda o necesita asistencia adicional, no dude en contactarnos.</p>
+    <p>Se ha confirmado los detalles de la estadia del cliente correctamente.</p>
     <a href="index.php" class="btn">Volver al Inicio</a>
 </body>
 </html>
