@@ -51,6 +51,6 @@ unset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['habitaciones'], 
     <h1>¡Reservas Confirmadas!</h1>
     <p>Gracias por realizar su reserva con nosotros. Hemos confirmado los detalles de su estadía.</p>
     <p>Si tiene alguna duda o necesita asistencia adicional, no dude en contactarnos.</p>
-    <a href="index_administrador.php" class="btn">Volver al Inicio</a>
+    <a href="menu_empleado.php" class="btn">Volver al Inicio</a>
 </body>
 </html>

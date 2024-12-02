@@ -44,6 +44,6 @@ unset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['habitaciones'], 
 <body>
     <h1>¡Reservas Confirmadas!</h1>
     <p>Se ha confirmado los detalles de la estadia del cliente correctamente.</p>
-    <a href="index.php" class="btn">Volver al Inicio</a>
+    <a href="menu_empleado.php" class="btn">Volver al Inicio</a>
 </body>
 </html>
