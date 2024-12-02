@@ -18,11 +18,10 @@ if ($conn->connect_error) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'];
     $cantidad = $_POST['cantidad'];
-    $tipo = $_POST['tipo']; // 'bebida' o 'plato'
+    $tipo = $_POST['tipo']; // 'bebida', 'plato', o 'habitacion'
 
     // Validar entrada
     if (!empty($id) && !empty($cantidad) && $cantidad > 0) {
-        // Obtener el precio del producto dependiendo de si es plato o bebida
         if ($tipo === 'plato') {
             // Consultar el precio del plato
             $query_plato = "SELECT precio, nombre_plato FROM restaurante WHERE id_plato = $id";
@@ -37,6 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $bebida = $result_bebida->fetch_assoc();
             $precio = $bebida['precio'];
             $nombre = $bebida['nombre_bebida'];
+        } elseif ($tipo === 'habitacion') {
+            // Consultar el precio del servicio a la habitación
+            $query_habitacion = "SELECT precio, nombre_producto FROM servicio_habitacion WHERE id_servicio = $id";
+            $result_habitacion = $conn->query($query_habitacion);
+            $habitacion = $result_habitacion->fetch_assoc();
+            $precio = $habitacion['precio'];
+            $nombre = $habitacion['nombre_producto'];
         }
 
         // Guardar en la sesión
@@ -47,16 +53,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'precio' => $precio,
             'nombre' => $nombre
         ];
-        
+
         // Redirigir con mensaje
         header('Location: pedido_restaurante_bar.php?mensaje=Pedido agregado correctamente');
         exit();
     }
 }
 
-// Consultar platos y bebidas
+// Consultar platos, bebidas y servicios a la habitación
 $platos = $conn->query("SELECT * FROM restaurante");
 $bebidas = $conn->query("SELECT * FROM bar");
+$habitacion = $conn->query("SELECT * FROM servicio_habitacion");
 
 // Verificar mensaje
 $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
@@ -69,77 +76,196 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pedidos Restaurante y Bar</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 20px;
-        }
-        h1, h2 {
-            text-align: center;
-        }
-        .busqueda {
-            margin-bottom: 20px;
-        }
-        .busqueda input {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .menu {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
+    /* General Styles */
+    body {
+        font-family: 'Roboto', Arial, sans-serif;
+        background-color: #f3f4f6; /* Color suave para el fondo */
+        margin: 0;
+        padding: 0;
+        color: #333; /* Texto legible */
+        line-height: 1.6; /* Espaciado agradable */
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Headers */
+    h1, h2 {
+        text-align: center;
+        color: #222;
+        margin-bottom: 20px;
+    }
+
+    h1 {
+        font-size: 2.5em;
+        font-weight: 700;
+    }
+
+    h2 {
+        font-size: 2em;
+        font-weight: 600;
+        border-bottom: 2px solid #007bff;
+        display: inline-block;
+        padding-bottom: 5px;
+    }
+
+    /* Search Bar */
+    .busqueda {
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .busqueda input {
+        width: 100%;
+        max-width: 600px;
+        padding: 12px 15px;
+        font-size: 16px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .busqueda input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+        outline: none;
+    }
+
+    /* Menu Items */
+    .menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .item {
+        width: 250px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .item img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .item h3 {
+        margin: 10px 0;
+        font-size: 1.2em;
+        font-weight: 600;
+        color: #444;
+    }
+
+    .item p {
+        margin: 5px 0;
+        color: #666;
+    }
+
+    /* Quantity Input */
+    .item input[type="number"] {
+        width: 60px;
+        padding: 5px;
+        font-size: 16px;
+        text-align: center;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+
+    /* Buttons */
+    .item button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .item button:hover {
+        background-color: #0056b3;
+        box-shadow: 0 3px 6px rgba(0, 123, 255, 0.4);
+    }
+
+    /* Notification Messages */
+    .mensaje {
+        text-align: center;
+        color: green;
+        font-weight: bold;
+        background-color: #e7f9e7;
+        border: 1px solid #c3e6c3;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
         .item {
-            width: 250px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 10px;
-            text-align: center;
-            background-color: white;
+            width: 100%;
         }
-        .item img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 5px;
+
+        .busqueda input {
+            width: 90%;
         }
-        .item h3 {
-            margin: 10px 0;
-        }
-        .item p {
-            margin: 5px 0;
-        }
-        .item input[type="number"] {
-            width: 60px;
-            padding: 5px;
-            text-align: center;
-        }
-        .item button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .item button:hover {
-            background-color: #0056b3;
-        }
-        .mensaje {
-            text-align: center;
-            color: green;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
+    }
+        .anclas {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin: 20px 0;
+    }
+
+    .enlace {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: #333;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 10px 20px;
+        border: 2px solid transparent;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .enlace:hover {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+    }
+
+    .icono {
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
+    }
     </style>
     <script>
         function buscar(inputId, menuClass) {
@@ -161,8 +287,20 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
             <p class="mensaje"><?php echo $mensaje; ?></p>
         <?php endif; ?>
         
-        <a href="#restaurante">restaruante</a>
-        <a href="#bar">bar</a>
+        <div class="anclas">
+            <a href="#restaurante" class="enlace">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAENUlEQVR4nO2aa4hVVRTHf844kxpNJk4oIROSKRozoaYoyFBWDH7oSyoVhKaUDkkII4yPfIDvD0ERBVbQKCI6ISoIag+sKAxfIGHE4HzQCdIP+R6foxML1obF7px7Lvfec+/Mbf9hfzhrrbPXOf+zz15rr70hICAgICAgICAgJ1QAE4CXgeeASoqPMcBKYD9wHDgFPJO20wHAYuA80GtaF/CBEpM26oEfPP+uvZ+m40pgT4xj1w4AVSk+w2qgx/i7qM90Xa/lI6SGj43jfcALQA0wEfjG6L7I0McjQCtwFrgBdAJbgKFZjLxtxofc9xYwUPUX0iZgKvBAnXwWY/OR6h8CjTEvfzRm5PwJ1Gbwv8rYtivxFqkT0G4etDrGRr7G72p3MEK/zrzEbmAB8LkZ0rti+m00Nu0xE26qBAwB7qqD5gTb+WrXEzGsu1T3tSdfofJ7wOMRff6m+g59FopNQKP5cqMSbGv1FxDbJiMfbPp4zbvnWaN73tM1Gd0rGfymSsDb2rnMtNngktq/Z2Q15kVmevZPGd0UT9em8tMJPlMloFk7/ztL+3Nq35InARUa5kS+vJQEvKGd384y0bmi9jLJ5UNAnZFLFCoZAZPMg0j6mwmjje2MPAmYauQjSknAQPNV1ybYtqpdNzAoTwJmGXlc6C1aHvCpOvgHGB5jM9RMgF95ulwImGbkUeGxqATUaeoqTn4EHvP0jwLfmblCVmr5EvC0kTeUmgA0rNlcXJy9CizRJMXplvJf5EKALKquqXwRfYAAwTJvNWabrBU+JBq55gEuBZfR1ScIQFeBe4FbZsgf0H+WAhPwpllgNfQVAhx2qFMhIwm5EiALnz9U92uGPKRsCRC8bvQb+R8SgIZVS4IUSEpCwIua7LTqAqVXawBOJlEhDQIkIvxk7H7WMFlUAp4A7sdEABsJRqZAgOAXz9eRYhMwyjj/S3MB11yxQ9q4lAg4a7JRqUwtLCUBkz3d+CISIPVBH/2KgN4MrWwJqAKuJrx8j645ypIAdIE0R9shE0GcTPYXKGcCopbX35M9AgGEEUC//wXGArMj5oCk/78sokBbQhT4NmGTtF8TsNLo72jr1dS62+i2lyMBg4GbZl+w2osClVpJcoUPv57Y7wmoNzqxiwqD1WahNbfcCJhidJL3x+UBrgA6L8Z/IIAwAgi/AGEOoGST4JNmMnvJ09l9PFurK+Qk6GqQWz35ALPUtocyCo4Kc2BBKsIWX6r8sjm6VmgCdqq+09ubnG36n07KWGucyWnNNVqcdLLNEfcUioDp5vyR7EWuV+LvqexkMU6qVukRuLhcXs4C+phsbFzF+BNzj4M7gyBnkuLQYkiwrStDBllwVALv6IZlh46EdyOGvk2FD+s5QLehIadHzuhpT4dNwDEzSuIwQzdNZcvsBLABGFagdwsICAgICAgIoOzxL0nBugjw35njAAAAAElFTkSuQmCC" alt="Restaurante" class="icono">
+                Restaurante
+            </a>
+            <a href="#bar" class="enlace">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAADlUlEQVR4nO2ZSYhUVxSGP4eoqFGkdacJjRNxAudZUQQRhKBuFcQBREXQGF3YuHBEjRgEJ3ChCKJuXDgEFBuHmODYKlHiwmGl4oDz2HY/Ofg/ORZdVa+qu1+9gvrgUq9enTvVveeec+6B7AwA1gJXgVdAoPIGuAKsAwaRYPoBx93As5W/gP4kjAVAtQZYC5wBFgOjge4qo4Cl+i2czEdgIQlhsxvYOWBIhDrDgX9dvT9IwEoEKn8CzXKo+wOw1dVfQgF1otpNIl+2uW3WiwJw3G2ndCsxFXgAjMzQTnOdZtZWJTEz0Cn20AxyOyRn/3omhrkt1pcYWatO7QTKRIXk9kVo86Jk7fCIjSp1akdsJsZLbrfbRvOAU8DyFNnfJXuBGHmpTs1OhLQE9gJHgGVAF6AF8AxYpcPhmttCZ1PaHKf3b3M8/fKmjRtMN/e+J1DjfrPn/cAd4H+5KEGBSmW2iZjF9owANgIHgUMqjws4gUDlci5bqy7ma2s9lfwG4mOD+rS+u2ZT9kzWeCLwGdij/f9JdabT+ExXX9U6cNKyJo3ChpQBTyRjkwhXx76/z2J76stQ9RHIhcoac4QG0YxZKkv0+3WgiXu/PUa92Bl15sdU4bzsg2emVmRwHY5iZQyTOKO+ItHX7XvzYqNSpiPZ6h1IWbF8aaK2rM17QKdcG5jt/oVdOfwLvwAvVG8F9adCbb2W4c2LTW4y/yhoiqJj/znD+Wu+nfO1bo30dQr1ZJ7bZrVy7X8DxgA9gHK58ouA05IJ3KddUvTJo98+7oJjJQ1Eb+BoDgp5UnoW7u27QMcc+jPZu6p7qIF07TvsZmS1gqVQD6x8AC4pPvcxR2u5EKFPFEXP/Ol3VW00OtbJj1lkOgMPIwZhPjx+BPxEwrCo850GaDqXjlmSMZ0cS0KZ4QYZujaeUbqkMJm5JJxNabzWn11IsIUioKmiTBvwTaAd0FZ+m707UYdLlFjaA7c08MMq9nwb6ECRUe5CgdBomq0qSibI+luZRJETqBQ9QWkiCaO0IkmjtCJJo7QiSaO0IoXGwuLJwHpltsIVOaV3kyOEzgWjly7Z/nYp70ylWrIVuuwrKK0Urt5IGWSN0hYWBU6TO1+u5y1K3/nMWKCga47ajJUw/x4O5Lnyj1N1N5yNMsnuVd2wnQcNcduYSxImvGGs0ndLmuZLS11ahMmn2piSSdyPIa1wL46J2L1wY08kXSbtG18AyOHjgcXDFRoAAAAASUVORK5CYII=" alt="Bar" class="icono">
+                Bar
+            </a>
+            <a href="#habitacion" class="enlace">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAAEPklEQVR4nO2YXYhVVRTHf1mNSWaZQRNmWU2UY2E9+JX1EFhW9FKThD5pFKRo0EMgPvQQGD2UHyNRkEWBKb0URCE0hThlgmAJY6VpaVmUQX7rjGXeWPLfsDqcs885d+6dORPzh829d6+Pu9fZ6/PAMIYOJgOrgF3ASa1d2jNa5dECrAXOArWMZbRO8VYSLUCXDtsLrAamAZdqTQfWAH3i6aqqMWt1wJ+B2yN8U4CD4rWbqRQmy2V6c4zwxvRJpp0KYZWesH0WRadkVlIhfKNDTS0hM10yPVQIJ3So0SVkRkvmOBXC8ToMGSOZY1TQtaaVkJnRJNe6HngdeKnkg/1PsFudKJuuX6Gx2OyKrxlTV/rtU2rNwx3AmSal353OkHX1KAjp9GCOMWbEL+K16t8IXAzMA9YDfzpDfgM2APPFU1hZaFH6ZNgM+amtmXKnM65FKaw8gkfVTdRylj3gR4oqbZEBsabxb91Ef424wMWZra+AJcAk199N0t7Xjq9TsoVjZqUy0gmtHgV2o2IiGGFt0RM5hxsBPCneSvV4j+lAp4FZJeTudsZ0MMgwl/xJh7GbKIunJLvfu/diYCPQDezWJPhJAWVdCvrDwA/Al8AbwNPAlTmy811MmMuUxQiXoi3TncdfGQHdFlHUlpNdLGVOjMhvEJ8Fcb14RjreDRuWUh+X79kB3xPDgoiSBeJ5X0//JuBeYBGwXbTPIsG7Tzy39sOQdunYm8WwSAxvRpS8JZ6lKbQr3PSY9cRP1tGgZnXepisVt4nh+ywG0Yznzgz6w+5PvIuOB/4oUPhqJZc1vKmBFFqE1hR6q2hHgQsL3Fq3C2gz5PeBMsTwoRgs12fl/03EcblrO55NoV/nYsWq9lUJ+khgtoryAXfoI8B9FMRzkZZ+jWjLC+ixPzynoneL279BNaCm5DDW0a4F3tawlsyELwMTKIGZEt6RQtsh2j0Fdb0m/m1yxZvdTW3VzQXcCBxK9F4rgLvqrDfnG8dTahxtnA0Y42aWS0pklx91sFeBX/V9cyJr2a1857rq9kZPaXPc3gMugMvAeql/3JNOGmFtxqei9SRuqd94QYrtagNWaO/FiNwcGZzEasl+lLhNK5rvuHljPA3G/VK+xe1t0d6DEblTevpzE/sXqXuwT4/npdPe4tjk2XBcpgGqV6lwpL6fzbn64D69BRLCPGU10/kQTUTIULP0NEMmicGnzKOR98hTdXv9bR5LvSJappVVWzyCER+4meGaBM9El2YHZNLr0J99rFVL8f0sQ0apToR6ZK6KPnuc3lib0zBcLR8+opXVf6UZYhinYS209a3KWvb720SNajr2uMPFOuI0Q4IbhbE2rMOq8AOKde4AsRkly5DQW23Sm5gvmpVm87DQHS42NcYMqQTa3OFspB2yhqDsYkHKUDekDIYNqRoG7UY+b8LLgP+NId2DYcgwqBD+BeSX0gdQMJjCAAAAAElFTkSuQmCC" alt="Habitacion" class="icono">
+                Habitacion
+            </a>
+        </div>
 
         <h2 id="restaurante">Platos</h2>
         <div class="busqueda">
@@ -204,6 +342,27 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
                 </div>
             <?php endwhile; ?>
         </div>
+
+        <!-- Menú del servicio a la habitación -->
+        <h2 id="habitacion">Servicio a la Habitación</h2>
+        <div class="busqueda">
+            <input type="text" id="buscar_habitacion" placeholder="Buscar en servicio a la habitación..." onkeyup="buscar('buscar_habitacion', 'menu_habitacion')">
+        </div>
+        <div class="menu menu_habitacion">
+            <?php while ($item = $habitacion->fetch_assoc()): ?>
+                <div class="item">
+                <img src="img/bebidas/<?php echo $item['id_servicio']; ?>.jpg" alt="Imagen de <?php echo htmlspecialchars($item['nombre_producto']); ?>">
+                    <h3><?php echo $item['nombre_producto']; ?></h3>
+                    <p><strong>S/ <?php echo number_format($item['precio'], 2); ?></strong></p>
+                    <form method="POST">
+                        <input type="hidden" name="id" value="<?php echo $item['id_servicio']; ?>">
+                        <input type="hidden" name="tipo" value="habitacion">
+                        <input type="number" name="cantidad" min="1" value="1" required>
+                        <button type="submit">Agregar Pedido</button>
+                    </form>
+                </div>
+            <?php endwhile; ?>
+        </div>
     </div>
     <?php if (isset($_SESSION['pedidos']) && count($_SESSION['pedidos']) > 0): ?>
     <form action="caja_restaurante_bar.php" method="POST" style="text-align: center; margin-top: 20px;">
@@ -212,6 +371,5 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
         </button>
     </form>
     <?php endif; ?>
-
 </body>
 </html>
