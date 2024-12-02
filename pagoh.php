@@ -101,10 +101,15 @@ foreach ($cuartos_seleccionados as $cuarto) {
         }
     }
 
-    // Calcular el subtotal, aplicando el descuento si es pago por web
-    $precio_ajustado = ($tipo_pago === 'web') ? $precio_base * 0.7 : $precio_base;
-    $subtotal = $precio_ajustado * $dias_estadia;
-    $total += $subtotal;
+// Calcular el subtotal, aplicando el descuento si es pago por web o por blackdays
+    // Calcular el precio ajustado
+    if ($tipo_pago === 'web') {
+        $precio_ajustado = $precio_base * 0.7;
+    } elseif ($tipo_pago === 'blackdays') {
+        $precio_ajustado = $precio_base * 0.65;
+    } else {
+        $precio_ajustado = $precio_base;
+    }
 }
 
     $query_reserva = "
@@ -147,6 +152,7 @@ foreach ($cuartos_seleccionados as $cuarto) {
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        
         body {
             font-family: 'Lato', 'Roboto', sans-serif !important;
             background-color: #f5f5f5;
@@ -426,43 +432,184 @@ foreach ($cuartos_seleccionados as $cuarto) {
     <div class="container">
         <!-- Detalles de la reserva -->
         <div class="section reservation-details">
-            <h3>Su Reserva</h3>
-            <p><strong>Habitación Superior Doble - 1 habitación</strong></p>
-            <p>1 noche, 2 adultos</p>
-            <p><strong>Subtotal:</strong> S/ 371.39</p>
-            <p><strong>Cargo por servicios (10%):</strong> S/ 37.14</p>
-            <div class="total"><strong>Total: S/ 408.53</strong></div>
+    <h3 >Detalles de su Reserva</h3>
+ 
+    <?php if (!empty($cuartos_seleccionados)): ?>
+            <?php 
+            $total_general = 0;
+            foreach ($cuartos_seleccionados as $index => $cuarto): 
+                $numero_cuarto = '';
+                $precio_base = 0;
+                $adultos = $cuarto['adultos']; // Obtén la cantidad de adultos del array
+            
+                foreach ($habitaciones_info as $habitacion) {
+                    if ($habitacion['id_cuarto'] == $cuarto['id_cuarto']) {
+                        $numero_cuarto = $habitacion['numero'];
+                        $precio_base = $habitacion['precio_base'];
+                        break;
+                    }
+                }
+            
+                // Calcular precio ajustado
+                $tipo_pago = $cuarto['tipo_pago'];
+                if ($tipo_pago === 'web') {
+                    $precio_ajustado = $precio_base * 0.7;
+                    $tipo_pago_desc = '<span style="color: #007bff;">Pagar por web</span>';
+                } elseif ($tipo_pago === 'blackdays') {
+                    $precio_ajustado = $precio_base * 0.65;
+                    $tipo_pago_desc = '<span style="color: #28a745;">Black Days</span>';
+                } else {
+                    $precio_ajustado = $precio_base;
+                    $tipo_pago_desc = '<span style="color: #6c757d;">Pagar en hotel</span>';
+                }
+            
+                $subtotal = $precio_ajustado * $dias_estadia;
+                $total_general += $subtotal;
+            
+                // Mostrar detalles de cada habitación
+                echo "<div style='border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;'>
+                    <div>
+                        <p style='margin: 0; font-size: 16px;'><strong>Habitación " . ($index + 1) . ":</strong></p>
+                        <p style='margin: 0; font-size: 14px;'>$dias_estadia noches / $adultos adulto(s) / Nro $numero_cuarto</p>
+                        <p style='margin: 0; font-size: 14px;'>Tipo de pago: <strong>$tipo_pago_desc</strong></p>";
+            
+                        // Mostrar precio normal tachado si aplica
+                        if ($tipo_pago === 'web' || $tipo_pago === 'blackdays') {
+                            echo "<p style='margin: 0; font-size: 14px;'>Precio normal: <strong style='text-decoration: line-through;'>S/ " . number_format($precio_base, 2) . "</strong></p>";
+                        } else {
+                            echo "<p style='margin: 0; font-size: 14px;'>Precio normal: <strong>S/ " . number_format($precio_base, 2) . "</strong></p>";
+                        }
+            
+                        // Mostrar precio con descuento
+                        echo "<p style='margin: 0; font-size: 14px;'>Precio con descuento: <strong>S/ " . number_format($precio_ajustado, 2) . "</strong></p>
+                    </div>
+                </div>";
+            endforeach;
+            
+
+            // Mostrar subtotal general
+            echo '<hr style="margin: 20px 0; border: none; border-top: 2px solid #ddd;">';
+            echo "<p style='text-align: right; font-size: 18px;'><strong>Subtotal:</strong> S/ " . number_format($total_general, 2) . "</p>";
+            ?>
+        <?php else: ?>
+            <p style="text-align: center; color: #888;">No hay información disponible sobre las habitaciones seleccionadas.</p>
+        <?php endif; ?>
+    </div>
+
+
+    <!-- Información del cliente -->
+<div class="section guest-info">
+    <h3>Información del Cliente</h3>
+    <form method="POST" id="formulario">
+        <div class="row mb-2">
+            <div class="col-6">
+                <label for="nombre" class="form-label">Nombre:</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingresa tu nombre" required>
+            </div>
+            <div class="col-6">
+                <label for="apellido" class="form-label">Apellido:</label>
+                <input type="text" class="form-control" id="apellido" name="apellido" placeholder="Ingresa tu apellido" required>
+            </div>
         </div>
-        <!-- Información del huésped -->
-        <div class="section guest-info">
-            <h3>Información del huésped</h3>
-            <label>Nombre:</label>
-            <input type="text" placeholder="Ingresa tu nombre">
-            <label>Apellido:</label>
-            <input type="text" placeholder="Ingresa tu apellido">
-            <label>Dirección de correo electrónico:</label>
-            <input type="email" placeholder="Ingresa tu correo">
-            <label>¿Eres un agente de viajes?</label>
-            <input type="checkbox"> Sí
+        <div class="row mb-2">
+            <div class="col-6">
+                <label for="tipo_documento" class="form-label">Tipo de Documento:</label>
+                <select class="form-select" id="tipo_documento" name="tipo_documento" required>
+                    <option value="DNI">DNI</option>
+                    <option value="Pasaporte">Pasaporte</option>
+                    <option value="Cédula">Cédula</option>
+                </select>
+            </div>
+            <div class="col-6">
+                <label for="nro_documento" class="form-label">Número de Documento:</label>
+                <input type="text" class="form-control" id="nro_documento" name="nro_documento" placeholder="Número de documento" required>
+            </div>
         </div>
-        <!-- Información de pago -->
-        <div class="section payment-info">
-            <h3>Modo de Pago</h3>
-            <label>Nombre en la tarjeta:</label>
-            <input type="text" placeholder="Nombre del titular">
-            <label>Número de tarjeta:</label>
-            <input type="text" placeholder="XXXX-XXXX-XXXX-XXXX">
-            <label>Fecha de expiración:</label>
-            <input type="text" placeholder="MM/AA">
-            <label>CVC:</label>
-            <input type="text" placeholder="Código de seguridad">
-            <p>
-                <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Visa_2014.svg" alt="Visa">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/f/fb/Mastercard-logo.svg" alt="MasterCard">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Amex-logo.png" alt="Amex">
-            </p>
-            <button>Proceder al Pago</button>
+        <div class="row mb-2">
+            <div class="col-6">
+                <label for="celular" class="form-label">Celular:</label>
+                <input type="text" class="form-control" id="celular" name="celular" placeholder="Número de celular" required>
+            </div>
+            <div class="col-6">
+                <label for="pais" class="form-label">País:</label>
+                <select class="form-select" id="pais" name="pais" required>
+                    <option value="Argentina">Argentina</option>
+                    <option value="Brasil">Brasil</option>
+                    <option value="Chile">Chile</option>
+                    <option value="México">México</option>
+                    <option value="Perú">Perú</option>
+                    <!-- Agregar más países según sea necesario -->
+                </select>
+            </div>
         </div>
+        <div class="row mb-2">
+            <div class="col-12">
+                <label for="correo" class="form-label">Correo Electrónico:</label>
+                <input type="email" class="form-control" id="correo" name="correo" placeholder="Ingresa tu correo" required>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Información de pago con resumen de reserva -->
+<div class="section payment-info" style="font-family: Arial, sans-serif; padding: 15px; background-color: #f9f9f9; border-radius: 8px;">
+    <h3 style="text-align: center; font-size: 22px; color: #333;">Resumen de la Reserva</h3>
+
+    <?php if (!empty($cuartos_seleccionados)): ?>
+        <?php 
+        $total_general = 0;
+        $total_habitaciones = count($cuartos_seleccionados);
+        
+        // Mostrar total de habitaciones
+        echo "<p style='font-size: 16px; color: #555; text-align: center;'><strong>Total de habitaciones:</strong> $total_habitaciones</p>";
+
+        foreach ($cuartos_seleccionados as $index => $cuarto): 
+            $numero_cuarto = '';
+            $precio_base = 0;
+        
+            // Obtener el precio de la habitación y el número
+            foreach ($habitaciones_info as $habitacion) {
+                if ($habitacion['id_cuarto'] == $cuarto['id_cuarto']) {
+                    $numero_cuarto = $habitacion['numero'];
+                    $precio_base = $habitacion['precio_base'];
+                    break;
+                }
+            }
+        
+            // Calcular precio ajustado
+            $tipo_pago = $cuarto['tipo_pago'];
+            if ($tipo_pago === 'web') {
+                $precio_ajustado = $precio_base * 0.7;
+            } elseif ($tipo_pago === 'blackdays') {
+                $precio_ajustado = $precio_base * 0.65;
+            } else {
+                $precio_ajustado = $precio_base;
+            }
+        
+            // Mostrar el precio de cada habitación
+            echo "<p style='font-size: 14px; color: #555; text-align: center;'>Habitación " . ($index + 1) . " (Nro: $numero_cuarto) - <strong>S/ " . number_format($precio_ajustado, 2) . "</strong></p>";
+
+            // Sumar al total general
+            $subtotal = $precio_ajustado * $dias_estadia;
+            $total_general += $subtotal;
+        endforeach;
+        
+        // Mostrar el total general centrado
+        echo "<p style='font-size: 18px; font-weight: bold; color: #333; text-align: center; margin-top: 20px;'><strong>Total a pagar:</strong> S/ " . number_format($total_general, 2) . "</p>";
+        ?>
+    <?php else: ?>
+        <p style="text-align: center; color: #888;">No hay información disponible sobre las habitaciones seleccionadas.</p>
+    <?php endif; ?>
+
+    <!-- Botón para pagar -->
+    <div style="text-align: center; margin-top: 20px;">
+        <button type="submit" form="formulario" class="btn btn-warning" style="padding: 10px 20px; font-size: 16px; border-radius: 5px; background-color: #ffc107; border: none; cursor: pointer;">Pagar</button>
+    </div>
+</div>
+
+
+
+
     </div>
 </body>
 </html> 
