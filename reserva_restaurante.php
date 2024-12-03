@@ -21,12 +21,14 @@ $cuartos_seleccionados = $_SESSION['cuartos_seleccionados']; // Array con habita
 // Inicializar variables para las fechas
 $fecha_reserva = '';
 
+// Verificar si se ha enviado el formulario de consultar mesas
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['consultar_mesas'])) {
+    // Obtener la información de la mesa y reserva
     $fecha_reserva = $_POST['fecha_reserva'];
-    $tipo_reserva = $_POST['tipo_reserva'];  // Tipo de reserva: desayuno, almuerzo, cena
-    $_SESSION['fecha_reserva_mesas'] = $fecha_reserva;
-    
-    // Buscar mesas que ya están reservadas para esa fecha y tipo de reserva
+    $tipo_reserva = $_POST['tipo_reserva']; // Tipo de reserva (desayuno, almuerzo, cena)
+    $_SESSION['fecha_reserva_mesas'] = $fecha_reserva; // Guardar en sesión
+
+    // Buscar mesas reservadas para esa fecha y tipo de reserva
     $sql_mesas_reservadas = "SELECT id_mesa FROM reserva_restaurante WHERE fecha_reserva = ? AND tipo_reserva = ?";
     $stmt_mesas_reservadas = $conn->prepare($sql_mesas_reservadas);
     $stmt_mesas_reservadas->bind_param("ss", $fecha_reserva, $tipo_reserva);
@@ -34,10 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['consultar_mesas'])) {
     $result_mesas_reservadas = $stmt_mesas_reservadas->get_result();
 
     $mesas_reservadas = [];
-    if ($result_mesas_reservadas->num_rows > 0) {
-        while ($row_mesa_reservada = $result_mesas_reservadas->fetch_assoc()) {
-            $mesas_reservadas[] = $row_mesa_reservada['id_mesa'];
-        }
+    while ($row_mesa_reservada = $result_mesas_reservadas->fetch_assoc()) {
+        $mesas_reservadas[] = $row_mesa_reservada['id_mesa'];
     }
 
     // Mostrar mesas disponibles
@@ -60,89 +60,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['consultar_mesas'])) {
     }
 }
 
-// Calcular el costo total según las mesas seleccionadas
-$total_costo_mesas = 0;
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Reservar mesas
-    if (isset($_POST['reservar_mesas'])) {
-        // Verifica si se están seleccionando mesas
-        $mesas_seleccionadas = $_POST['mesas'] ?? [];
-        $id_reserva = $_SESSION['id_reserva']; // Asegúrate de que el ID de la reserva esté en la sesión
-        $tipo_reserva = $_POST['tipo_reserva'];  // Obtener el tipo de reserva desde el formulario
+// Procesar la reserva de mesas
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reservar_mesa'])) {
+    // Verificar que se han seleccionado mesas
+    if (isset($_POST['id_mesa'])) {
+        // Obtener información de la mesa seleccionada
+        $id_mesa = $_POST['id_mesa'];
+        $fecha_reserva = $_POST['fecha_reserva'];
+        $tipo_reserva = $_POST['tipo_reserva']; // Desayuno, almuerzo, cena
 
-        // Inicializar el costo total de las mesas
-        $total_costo_mesas = 0;
+        // Guardar la información de la mesa en la sesión
+        $_SESSION['reserva_mesa'][] = [
+            'id_mesa' => $id_mesa,
+            'fecha_reserva' => $fecha_reserva,
+            'tipo_reserva' => $tipo_reserva
+        ];
 
-        // Si se están seleccionando varias mesas
-        if (count($mesas_seleccionadas) > 0) {
-            // Calcular el total del costo de las mesas seleccionadas
-            foreach ($mesas_seleccionadas as $id_mesa) {
-                $sql_precio_mesa = "SELECT precio_reservam FROM mesas WHERE id_mesa = ?";
-                $stmt_precio_mesa = $conn->prepare($sql_precio_mesa);
-                $stmt_precio_mesa->bind_param("i", $id_mesa);
-                $stmt_precio_mesa->execute();
-                $result_precio_mesa = $stmt_precio_mesa->get_result();
-                if ($row_precio_mesa = $result_precio_mesa->fetch_assoc()) {
-                    $total_costo_mesas += $row_precio_mesa['precio_reservam'];
-                }
-            }
+        // Obtener el precio de la mesa
+        $sql_precio_mesa = "SELECT precio_reservam FROM mesas WHERE id_mesa = ?";
+        $stmt_precio_mesa = $conn->prepare($sql_precio_mesa);
+        $stmt_precio_mesa->bind_param("i", $id_mesa);
+        $stmt_precio_mesa->execute();
+        $result_precio_mesa = $stmt_precio_mesa->get_result();
+        $row_precio_mesa = $result_precio_mesa->fetch_assoc();
+        $total_costo_mesas = $row_precio_mesa['precio_reservam'];
 
-            // Guardar las reservas en la tabla `reserva_restaurante` (para cada mesa seleccionada)
-            foreach ($mesas_seleccionadas as $id_mesa) {
-                $sql_insert_reserva_mesa = "INSERT INTO reserva_restaurante (id_mesa, id_reserva, fecha_reserva, tipo_reserva) VALUES (?, ?, ?, ?)";
-                $stmt_insert_reserva_mesa = $conn->prepare($sql_insert_reserva_mesa);
-                $stmt_insert_reserva_mesa->bind_param("iiss", $id_mesa, $id_reserva, $_SESSION['fecha_reserva_mesas'], $tipo_reserva);
-                $stmt_insert_reserva_mesa->execute();
-            }
-
-            // Guardar el costo total en la sesión
-            $_SESSION['costo_total_mesas'] = $total_costo_mesas;
+        // Actualizar el costo total en la sesión
+        if (isset($_SESSION['total_costo_mesas'])) {
+            $_SESSION['total_costo_mesas'] += $total_costo_mesas;
+        } else {
+            $_SESSION['total_costo_mesas'] = $total_costo_mesas;
         }
-        // Si solo se está reservando una mesa individual
-        else if (isset($_POST['id_mesa'])) {
-            $id_mesa = $_POST['id_mesa'];  // El id de la mesa seleccionada
-            $fecha_reserva = $_POST['fecha_reserva'];  // La fecha de reserva seleccionada
-            $tipo_reserva = $_POST['tipo_reserva'];  // El tipo de reserva (desayuno, almuerzo, cena)
-
-            // Obtener el precio de la mesa
-            $sql_precio_mesa = "SELECT precio_reservam FROM mesas WHERE id_mesa = ?";
-            $stmt_precio_mesa = $conn->prepare($sql_precio_mesa);
-            $stmt_precio_mesa->bind_param("i", $id_mesa);
-            $stmt_precio_mesa->execute();
-            $result_precio_mesa = $stmt_precio_mesa->get_result();
-            $row_precio_mesa = $result_precio_mesa->fetch_assoc();
-            $total_costo_mesas = $row_precio_mesa['precio_reservam'];
-
-            // Guardar la reserva de la mesa en la tabla `reserva_restaurante`
-            $sql_insert_reserva_mesa = "INSERT INTO reserva_restaurante (id_mesa, id_reserva, fecha_reserva, tipo_reserva) VALUES (?, ?, ?, ?)";
-            $stmt_insert_reserva_mesa = $conn->prepare($sql_insert_reserva_mesa);
-            $stmt_insert_reserva_mesa->bind_param("iiss", $id_mesa, $id_reserva, $fecha_reserva, $tipo_reserva);
-            $stmt_insert_reserva_mesa->execute();
-
-            // Guardar el costo total en la sesión
-            $_SESSION['costo_total_mesas'] = $total_costo_mesas;
-        }
-
-        // Redirigir a la página de resumen después de la reserva
-        header("Location: reserva_restaurante.php");
-        exit();
-    }
-
-    // Botón para resetear el formulario y reservar más mesas para otro día
-    if (isset($_POST['añadir_reserva'])) {
-        header("Location: reserva_restaurante.php"); // Redirige de nuevo a la página de reserva para seleccionar más mesas
-        exit();
-    }
-
-    // Botón para continuar a la siguiente sección
-    if (isset($_POST['continuar'])) {
-        header("Location: siguiente_seccion.php"); // Cambia esto a la página deseada
-        exit();
     }
 }
-
-
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -484,7 +437,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </select>
                         </div>
                         <div class="col-4 text-start">
-                            <br><p class="form-label">Total: <p class="forms1"> S/. <span id="total-costo-mesas">0</span></p></p>
+                            <br><p class="form-label">Total: <p class="forms1"> S/. <span id="total-costo-mesas"><?php echo $_SESSION['total_costo_mesas'] ?? '0'; ?></span></p></p>
                         </div>
                     </div>
                 </div>
@@ -507,22 +460,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <p>Disfruta de una experiencia gastronómica única con un ambiente acogedor en una <?php echo htmlspecialchars($mesa['descripcion']); ?>.</p>   
                             </div>
                             <div class="habitacion-options">
-                                <form method="POST">
-                                    <input type="hidden" name="id_mesa" value="<?php echo htmlspecialchars($mesa['id_mesa']); ?>">
-                                    <input type="hidden" name="fecha_reserva" value="<?php echo htmlspecialchars($fecha_reserva); ?>"> <!-- Asegúrate de que esta variable esté correctamente asignada -->
-                                    <input type="hidden" name="tipo_reserva" value="<?php echo htmlspecialchars($tipo_reserva); ?>"> <!-- Pasar el tipo de reserva (desayuno, almuerzo, cena) -->
-                                    
-                                    <!-- Contenedor de pago y precio final -->
-                                    <div class="payment-container">
-                                        <!-- Monto final con fondo negro -->
-                                        <div class="final-price">
-                                            <strong>S/ <?php echo htmlspecialchars($mesa['precio_reservam']); ?></strong>
-                                        </div>
-
-                                        <!-- Botón de Reservar -->
-                                        <button type="submit" name="reservar_mesa" class="btn-warning">Reservar Mesa</button>
-                                    </div>
-                                </form>
+                            <form method="POST">
+                            <input type="hidden" name="id_mesa" value="<?php echo htmlspecialchars($mesa['id_mesa']); ?>">
+                            <input type="hidden" name="fecha_reserva" value="<?php echo htmlspecialchars($fecha_reserva); ?>">
+                            <input type="hidden" name="tipo_reserva" value="<?php echo htmlspecialchars($tipo_reserva); ?>">
+                            
+                            <div class="payment-container">
+                                <div class="final-price">
+                                    <strong>S/ <?php echo htmlspecialchars($mesa['precio_reservam']); ?></strong>
+                                </div>
+                                <button type="submit" name="reservar_mesa" class="btn-warning">Reservar Mesa</button>
+                            </div>
+                        </form>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -532,23 +481,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php endif; ?>
 
     </div>
-
-    <script>
-        const checkboxesMesas = document.querySelectorAll('.mesa');
-        const totalCostoMesasElement = document.getElementById('total-costo-mesas');
-
-        checkboxesMesas.forEach(checkbox => {
-            checkbox.addEventListener('change', () => {
-                let totalMesas = 0;
-                checkboxesMesas.forEach(cb => {
-                    if (cb.checked) {
-                        totalMesas += parseFloat(cb.getAttribute('data-precio'));
-                    }
-                });
-                totalCostoMesasElement.textContent = totalMesas.toFixed(2); // Mostrar el total con dos decimales
-            });
-        });
-    </script>
-
 </body>
 </html>
