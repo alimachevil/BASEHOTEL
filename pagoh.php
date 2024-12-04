@@ -487,7 +487,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Mostrar detalles de cada habitación
             echo "<div style='border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;'>
                 <div>
-                    <p style='margin: 0; font-size: 16px;'><strong>Habitación " . ($index + 1) . ":</strong></p>
+                    <p style='margin: 0; font-size: 16px;'><strong>Habitación " . ($index + 1) . ":<br> $descripcion_cuarto</strong></p>
                     <p style='margin: 0; font-size: 14px;'>$dias_estadia noche(s) / $adultos adulto(s) / $ninos niño(s) / Nro $numero_cuarto</p>
                     <p style='margin: 0; font-size: 14px;'>Tipo de pago: <strong>$tipo_pago_desc</strong></p>";
 
