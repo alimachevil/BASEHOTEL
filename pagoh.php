@@ -15,12 +15,20 @@ if (!isset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['cuartos_sel
     exit();
 }
 
+// Verifica si la reserva de mesa está en la sesión (de reserva_restaurante.php)
+$reserva_mesa = isset($_SESSION['reserva_mesa']) ? $_SESSION['reserva_mesa'] : [];
+$total_costo_mesas = isset($_SESSION['total_costo_mesas']) ? $_SESSION['total_costo_mesas'] : 0;
+
 // Variables de sesión
 $check_in = $_SESSION['check_in'];
 $check_out = $_SESSION['check_out'];
 $cuartos_seleccionados = $_SESSION['cuartos_seleccionados']; // Array con habitaciones seleccionadas
 $adultos = $_SESSION['adultos'];  // Adultos por habitación
 $ninos = $_SESSION['ninos'];    // Niños por habitación
+$fecha_reserva = $_SESSION['fecha_reserva'];
+$tipo_reserva = $_SESSION['tipo_reserva']; // Tipo de reserva (desayuno, almuerzo, cena)
+$total_costo_mesas = $_SESSION['total_costo_mesas'];
+
 
 // Conexión a la base de datos
 $host = 'localhost';
@@ -66,10 +74,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $celular = $_POST['celular'];
     $pais = $_POST['pais'];
 
+    // Calcular el total de la reserva de hotel
     $total_pago = 0;
     foreach ($habitaciones_info as $habitacion) {
         $total_pago += $habitacion['precio_base'] * $dias_estadia;
     }
+
+    // Sumar el costo de las mesas al total de la reserva
+    $total_pago += $total_costo_mesas;
 
     // Insertar datos del cliente en la tabla `clientes`
     $query_cliente = "
@@ -85,38 +97,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fecha_reserva = date('Y-m-d H:i:s'); // Fecha actual
     $id_promocion = null; // Asumimos sin promociones
     $id_hotel = 1; // Asumimos un hotel por defecto
-
-    // Calculo del total
-    $total = 0;
-    foreach ($cuartos_seleccionados as $cuarto) {
-        $id_cuarto = $cuarto['id_cuarto'];
-        $tipo_pago = $cuarto['tipo_pago'];
-
-        // Obtener el número de la habitación, precio base y descripción desde la base de datos
-        $precio_base = 0;
-        $numero_cuarto = '';
-        $descripcion_cuarto = ''; // Nueva variable para la descripción
-        foreach ($habitaciones_info as $habitacion) {
-            if ($habitacion['id_cuarto'] == $id_cuarto) {
-                $precio_base = $habitacion['precio_base'];
-                $numero_cuarto = $habitacion['numero']; // Guardar el número de la habitación
-                $descripcion_cuarto = $habitacion['descripcion']; // Guardar la descripción
-                break;
-            }
-        }
-
-        // Calcular el subtotal, aplicando el descuento si es pago por web o por blackdays
-        if ($tipo_pago === 'web') {
-            $precio_ajustado = $precio_base * 0.7;
-        } elseif ($tipo_pago === 'blackdays') {
-            $precio_ajustado = $precio_base * 0.65;
-        } else {
-            $precio_ajustado = $precio_base;
-        }
-
-        // Sumar al total
-        $total += $precio_ajustado * $dias_estadia;
-    }
 
     // Insertar la reserva en la tabla `reservas` con el total de pago
     $query_reserva = "
@@ -141,27 +121,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Agregar los acompañantes a la base de datos si se envían
-    if (isset($_POST['acompanantes'])) {
-        $acompanantes = $_POST['acompanantes']; // Datos de los acompañantes
+    // Agregar los datos de reserva de mesa (si existen) a la base de datos
+    foreach ($reserva_mesa as $mesa) {
+        $id_mesa = $mesa['id_mesa'];
+        $fecha_reserva_mesa = $mesa['fecha_reserva'];
+        $tipo_reserva = $mesa['tipo_reserva'];
 
-        foreach ($acompanantes as $acompanante) {
-            $nombre_acompanante = $acompanante['nombre'];
-            $apellido_acompanante = $acompanante['apellido'];
-            $tipo_documento_acompanante = $acompanante['tipo_documento'];
-            $nro_documento_acompanante = $acompanante['nro_documento'];
-            $celular_acompanante = $acompanante['celular'];
-            $pais_acompanante = $acompanante['pais'];
-            $correo_acompanante = $acompanante['correo'];
+        $query_reserva_mesa = "
+            INSERT INTO reserva_restaurante (id_reserva, id_mesa, fecha_reserva, tipo_reserva)
+            VALUES ($id_reserva, $id_mesa, '$fecha_reserva_mesa', '$tipo_reserva')
+        ";
 
-            $query_acompanante = "
-                INSERT INTO acompañantes (nombre, apellido, tipo_documento, nro_documento, celular, pais, correo, id_reserva)
-                VALUES ('$nombre_acompanante', '$apellido_acompanante', '$tipo_documento_acompanante', '$nro_documento_acompanante', '$celular_acompanante', '$pais_acompanante', '$correo_acompanante', $id_reserva)
-            ";
-
-            if (!$conn->query($query_acompanante)) {
-                die("Error al guardar el acompañante: " . $conn->error);
-            }
+        if (!$conn->query($query_reserva_mesa)) {
+            die("Error al guardar la reserva de mesa: " . $conn->error);
         }
     }
 
@@ -469,7 +441,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <?php 
     // Verifica si la sesión tiene los datos necesarios
-    if (isset($_SESSION['cuartos_seleccionados'], $_SESSION['adultos'], $_SESSION['ninos'], $habitaciones_info)): 
+    if (isset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['cuartos_seleccionados'], $_SESSION['adultos'], $_SESSION['ninos'], $habitaciones_info, $_SESSION['reserva_mesa'])): 
         $total_general = 0; // Variable para el total general de la reserva
 
         // Calcula los días de estadía
@@ -531,17 +503,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>";
         endforeach;
-        
-// Mostrar el total general
-echo "<div style='border-top: 1px solid #ddd; padding: 15px 0; display: flex; justify-content: flex-end; align-items: center;'>
-        <div style='margin-right: 10px;'>Subtotal:</div>
-        <div style='font-size: 20px; font-weight: bold;'>S/ " . number_format($total_general, 2) . "</div>
-      </div>";
 
+        // Mostrar detalles de las mesas seleccionadas
+        if (isset($_SESSION['reserva_mesa']) && !empty($_SESSION['reserva_mesa'])):
+            // Iterar sobre las mesas en la sesión
+            foreach ($_SESSION['reserva_mesa'] as $index => $mesa):
+                // Asegúrate de que cada mesa tenga los valores necesarios
+                if (isset($mesa['id_mesa'], $mesa['fecha_reserva'], $mesa['tipo_reserva'])):
+                    $id_mesa = $mesa['id_mesa']; // ID de la mesa
+                    $fecha_reserva = $mesa['fecha_reserva']; // Fecha de la reserva
+                    $tipo_reserva = $mesa['tipo_reserva']; // Tipo de reserva
+
+                    // Mostrar los detalles de la mesa
+                    echo "<div style='border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;'>
+                            <div>
+                                <p style='margin: 0; font-size: 16px;'><strong>Mesa " . ($index + 1) . ":</strong></p>
+                                <p style='margin: 0; font-size: 14px;'>ID de la mesa: <strong>$id_mesa</strong></p>
+                                <p style='margin: 0; font-size: 14px;'>Fecha de reserva: <strong>$fecha_reserva</strong></p>
+                                <p style='margin: 0; font-size: 14px;'>Tipo de reserva: <strong>$tipo_reserva</strong></p>
+                                <p style='margin: 0; font-size: 14px;'>Total por mesas: <strong>S/ " . number_format($total_costo_mesas, 2) . "</strong></p>
+                            </div>
+                        </div>";
+                        $total_general += $total_costo_mesas; // Sumar el costo de las mesas al total general
+                else:
+                    echo "<p>Faltan datos para la mesa " . ($index + 1) . ".</p>";
+                endif;
+            endforeach;
+        else:
+            echo "<p>No se han reservado mesas.</p>";
+        endif;
+
+        // Mostrar el total general
+        echo "<div style='border-top: 1px solid #ddd; padding: 15px 0; display: flex; justify-content: flex-end; align-items: center;'>
+                <div style='margin-right: 10px;'>Subtotal:</div>
+                <div style='font-size: 20px; font-weight: bold;'>S/ " . number_format($total_general, 2) . "</div>
+              </div>";
 
     endif;
     ?>
 </div>
+
+
+
 
 
 
@@ -605,21 +608,17 @@ echo "<div style='border-top: 1px solid #ddd; padding: 15px 0; display: flex; ju
 
 
 
-
-
-
-
-
 <!-- Información de pago con resumen de reserva -->
 <div class="section payment-info" style="font-family: Arial, sans-serif; padding: 15px; background-color: #f9f9f9; border-radius: 8px;">
     <h3 style="text-align: center; font-size: 22px; color: #333;">Resumen de la Reserva</h3>
 
-    <?php if (!empty($cuartos_seleccionados)): ?>
-        <?php 
-        $total_general = 0;
+    <?php 
+    $total_general = 0; // Inicializar el total general
+
+    // Mostrar el resumen de habitaciones si existen
+    if (!empty($cuartos_seleccionados)): 
         $total_habitaciones = count($cuartos_seleccionados);
         
-        // Mostrar total de habitaciones
         echo "<p style='font-size: 16px; color: #555; text-align: center;'><strong>Total de habitaciones:</strong> $total_habitaciones</p>";
 
         foreach ($cuartos_seleccionados as $index => $cuarto): 
@@ -646,25 +645,41 @@ echo "<div style='border-top: 1px solid #ddd; padding: 15px 0; display: flex; ju
             }
         
             // Mostrar el precio de cada habitación
-            echo "<p style='font-size: 14px; color: #555; text-align: center;'>Habitación " . ($index + 1) . " (Nro: $numero_cuarto) - <strong>S/ " . number_format($precio_ajustado, 2) . "</strong></p>";
+            echo "<p style='font-size: 14px; color: #555; text-align: center;'>Habitación " . ($index + 1) . " (Nro: $numero_cuarto) x <strong> $dias_estadia días = S/ " . number_format($precio_ajustado * $dias_estadia, 2) . "</strong></p>";
 
             // Sumar al total general
             $subtotal = $precio_ajustado * $dias_estadia;
             $total_general += $subtotal;
         endforeach;
-        
-        // Mostrar el total general centrado
-        echo "<p style='font-size: 18px; font-weight: bold; color: #333; text-align: center; margin-top: 20px;'><strong>Total a pagar:</strong> S/ " . number_format($total_general, 2) . "</p>";
-        ?>
-    <?php else: ?>
-        <p style="text-align: center; color: #888;">No hay información disponible sobre las habitaciones seleccionadas.</p>
-    <?php endif; ?>
+    else:
+        echo "<p style='text-align: center; color: #888;'>No hay información disponible sobre las habitaciones seleccionadas.</p>";
+    endif;
+
+    // Mostrar el resumen de mesas si existen reservas
+    if (!empty($reserva_mesa)): 
+       // echo "<h4 style='font-size: 18px; color: #333; text-align: center; margin-top: 20px;'>Mesas Reservadas</h4>";
+        foreach ($reserva_mesa as $index => $mesa) {
+            $tipo_mesa = $mesa['tipo_reserva'];
+            //$costo_mesa = $mesa['costo_mesa'];
+
+            echo "<p style='font-size: 14px; color: #555; text-align: center;'>Mesa " . ($index + 1) . " (Tipo: $tipo_mesa) = <strong>S/ "  . number_format($total_costo_mesas, 2) ."</strong></p>";
+
+            $total_general += $total_costo_mesas;
+        }
+    else:
+        echo "<p style='text-align: center; color: #888;'>No hay información disponible sobre las mesas reservadas.</p>";
+    endif;
+
+    // Mostrar el total general
+    echo "<p style='font-size: 18px; font-weight: bold; color: #333; text-align: center; margin-top: 20px;'><strong>Total a pagar:</strong> S/ " . number_format($total_general, 2) . "</p>";
+    ?>
 
     <!-- Botón para pagar -->
     <div style="text-align: center; margin-top: 20px;">
         <button type="submit" form="formulario" class="btn btn-warning" style="padding: 10px 20px; font-size: 16px; border-radius: 5px; background-color: #ffc107; border: none; cursor: pointer;">Pagar</button>
     </div>
 </div>
+
 
 
 
