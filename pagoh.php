@@ -25,8 +25,6 @@ $check_out = $_SESSION['check_out'];
 $cuartos_seleccionados = $_SESSION['cuartos_seleccionados']; // Array con habitaciones seleccionadas
 $adultos = $_SESSION['adultos'];  // Adultos por habitación
 $ninos = $_SESSION['ninos'];    // Niños por habitación
-$fecha_reserva = $_SESSION['fecha_reserva'];
-$tipo_reserva = $_SESSION['tipo_reserva']; // Tipo de reserva (desayuno, almuerzo, cena)
 $total_costo_mesas = $_SESSION['total_costo_mesas'];
 
 
@@ -57,6 +55,28 @@ if (!empty($ids)) {
         while ($row = $result->fetch_assoc()) {
             $habitaciones_info[] = $row;
         }
+    }
+}
+
+// Array de descripciones vacío para llenar
+$descripciones = [];
+
+// Recorrer los cuartos seleccionados y obtener la descripción de cada cuarto
+foreach ($cuartos_seleccionados as $cuarto) {
+    $id_cuarto = $cuarto['id_cuarto'];
+
+    // Realizar la consulta para obtener la descripción
+    $sql = "SELECT descripcion FROM cuartos WHERE id_cuarto = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id_cuarto); // Vincular el id_cuarto como parámetro entero
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    // Verificar si se encontró la descripción
+    if ($row = $result->fetch_assoc()) {
+        $descripciones[] = $row['descripcion']; // Añadir la descripción al array
+    } else {
+        $descripciones[] = 'Descripción no disponible'; // Si no hay descripción, usar un texto predeterminado
     }
 }
 
@@ -137,6 +157,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    if (isset($_POST['nombre_acompanhante'])) {
+        // Preparamos la consulta SQL con placeholders (?)
+        $stmt = $conn->prepare("INSERT INTO acompañantes (nombre, apellido, tipo_documento, nro_documento, celular, pais, correo, id_reserva)
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        
+        // Verificamos si la preparación fue exitosa
+        if ($stmt === false) {
+            die("Error en la preparación de la consulta: " . $conn->error);
+        }
+    
+        // Recorremos los datos de los acompañantes y los insertamos
+        foreach ($_POST['nombre_acompanhante'] as $index => $acompanhantes) {
+            foreach ($acompanhantes as $i => $acompanhante) {
+                // Asignamos los valores a las variables
+                $nombre_acompanhante = $_POST['nombre_acompanhante'][$index][$i];
+                $apellido_acompanhante = $_POST['apellido_acompanhante'][$index][$i];
+                $tipo_documento = $_POST['tipo_documento_acompanhante'][$index][$i];
+                $nro_documento = $_POST['nro_documento_acompanhante'][$index][$i];
+                $celular = $_POST['celular_acompanhante'][$index][$i];
+                $pais = $_POST['pais_acompanhante'][$index][$i];
+                $correo = $_POST['correo_acompanhante'][$index][$i];
+    
+                // Ejecutamos la consulta para insertar los datos
+                $stmt->bind_param("sssssssi", $nombre_acompanhante, $apellido_acompanhante, $tipo_documento, $nro_documento, $celular, $pais, $correo, $id_reserva);
+                $stmt->execute();
+    
+                // Verificamos si hubo error en la inserción
+                if ($stmt->error) {
+                    echo "Error al insertar los datos: " . $stmt->error;
+                }
+            }
+        }
+    
+        // Cerramos la declaración preparada
+        $stmt->close();
+    }    
+
     // Guardar el ID de reserva en sesión y redirigir a la página de confirmación
     $_SESSION['id_reserva'] = $id_reserva;
     header('Location: confirmacion_pago.php');
@@ -156,6 +213,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Agregar FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         
         body {
@@ -266,6 +325,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .form-select {
             border: none;
             border-bottom: 2px solid #000;
+            border-radius: 0px;
             background-color: transparent;
             box-shadow: none;
             padding-left: 0;
@@ -355,12 +415,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         .guest-info input,
         .payment-info input {
-            width: 100%;
             padding: 10px;
             margin-bottom: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+
+        /* Contenedor del checkbox y el texto */
+        .form-check {
+            display: flex;
+            justify-content: flex-start;  /* Alinea todo el contenido a la izquierda */
+            margin: 0;  /* Asegura que no haya márgenes automáticos que puedan estar centrando el contenido */
+        }
+
+        /* Asegurarse de que el checkbox tenga un tamaño adecuado */
+        .form-check-input {
+            margin-right: 8px;  /* Espacio entre el checkbox y el texto */
+            transform: scale(1);  /* Asegura que el checkbox no se agrande */
+        }
+
         .payment-info {
             text-align: center;
         }
@@ -435,255 +508,378 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Contenido -->
     <div class="container">
-<!-- Detalles de la reserva -->
-<div class="section reservation-details">
-    <h3>Detalles de su Reserva</h3>
+        <!-- Detalles de la reserva -->
+        <div class="section reservation-details">
+            <h3>Detalles de su Reserva</h3>
 
-    <?php 
-    // Verifica si la sesión tiene los datos necesarios
-    if (isset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['cuartos_seleccionados'], $_SESSION['adultos'], $_SESSION['ninos'], $habitaciones_info, $_SESSION['reserva_mesa'])): 
-        $total_general = 0; // Variable para el total general de la reserva
+            <?php 
+            // Verifica si la sesión tiene los datos necesarios
+            if (isset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['cuartos_seleccionados'], $_SESSION['adultos'], $_SESSION['ninos'], $habitaciones_info, $_SESSION['reserva_mesa'])): 
+                $total_general = 0; // Variable para el total general de la reserva
 
-        // Calcula los días de estadía
-        $dias_estadia = calcularDiasEstadia($_SESSION['check_in'], $_SESSION['check_out']);
+                // Calcula los días de estadía
+                $dias_estadia = calcularDiasEstadia($_SESSION['check_in'], $_SESSION['check_out']);
 
-        // Asegúrate de que cuartos_seleccionados esté disponible
-        foreach ($_SESSION['cuartos_seleccionados'] as $index => $cuarto): 
-            $numero_cuarto = '';
-            $precio_base = 0;
-            $descripcion_cuarto = '';
+                // Asegúrate de que cuartos_seleccionados esté disponible
+                foreach ($_SESSION['cuartos_seleccionados'] as $index => $cuarto): 
+                    $numero_cuarto = '';
+                    $precio_base = 0;
+                    $descripcion_cuarto = '';
 
-            // Obtener el número de adultos y niños por cada cuarto desde la sesión
-            $adultos = isset($_SESSION['adultos'][$index]) ? $_SESSION['adultos'][$index] : 0;
-            $ninos = isset($_SESSION['ninos'][$index]) ? $_SESSION['ninos'][$index] : 0;
+                    // Obtener el número de adultos y niños por cada cuarto desde la sesión
+                    $adultos = isset($_SESSION['adultos'][$index]) ? $_SESSION['adultos'][$index] : 0;
+                    $ninos = isset($_SESSION['ninos'][$index]) ? $_SESSION['ninos'][$index] : 0;
 
-            // Buscar la habitación en las habitaciones_info
-            foreach ($habitaciones_info as $habitacion) {
-                if ($habitacion['id_cuarto'] == $cuarto['id_cuarto']) {
-                    $numero_cuarto = $habitacion['numero'];
-                    $precio_base = $habitacion['precio_base'];
-                    $descripcion_cuarto = $habitacion['descripcion'];
-                    break;
-                }
-            }
-
-            // Calcular precio ajustado según el tipo de pago
-            $tipo_pago = $cuarto['tipo_pago'];
-            if ($tipo_pago === 'web') {
-                $precio_ajustado = $precio_base * 0.7;
-                $tipo_pago_desc = '<span style="color: #007bff;">Pagar por web</span>';
-            } elseif ($tipo_pago === 'blackdays') {
-                $precio_ajustado = $precio_base * 0.65;
-                $tipo_pago_desc = '<span style="color: #28a745;">Black Days</span>';
-            } else {
-                $precio_ajustado = $precio_base;
-                $tipo_pago_desc = '<span style="color: #6c757d;">Pagar en hotel</span>';
-            }
-
-            // Calcular el subtotal por cuarto
-            $subtotal = $precio_ajustado * $dias_estadia;
-            $total_general += $subtotal;
-
-            // Mostrar detalles de cada habitación
-            echo "<div style='border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;'>
-                <div>
-                    <p style='margin: 0; font-size: 16px;'><strong>Habitación " . ($index + 1) . ":<br> $descripcion_cuarto</strong></p>
-                    <p style='margin: 0; font-size: 14px;'>$dias_estadia noche(s) / $adultos adulto(s) / $ninos niño(s) / Nro $numero_cuarto</p>
-                    <p style='margin: 0; font-size: 14px;'>Tipo de pago: <strong>$tipo_pago_desc</strong></p>";
-
-                    // Mostrar precio normal tachado si aplica
-                    if ($tipo_pago === 'web' || $tipo_pago === 'blackdays') {
-                        echo "<p style='margin: 0; font-size: 14px;'>Precio normal: <strong style='text-decoration: line-through;'>S/ " . number_format($precio_base, 2) . "</strong></p>";
-                    } else {
-                        echo "<p style='margin: 0; font-size: 14px;'>Precio normal: <strong>S/ " . number_format($precio_base, 2) . "</strong></p>";
+                    // Buscar la habitación en las habitaciones_info
+                    foreach ($habitaciones_info as $habitacion) {
+                        if ($habitacion['id_cuarto'] == $cuarto['id_cuarto']) {
+                            $numero_cuarto = $habitacion['numero'];
+                            $precio_base = $habitacion['precio_base'];
+                            $descripcion_cuarto = $habitacion['descripcion'];
+                            break;
+                        }
                     }
 
-                    // Mostrar precio con descuento
-                    echo "<p style='margin: 0; font-size: 14px;'>Precio con descuento: <strong>S/ " . number_format($precio_ajustado, 2) . "</strong></p>
-                </div>
-            </div>";
-        endforeach;
+                    // Calcular precio ajustado según el tipo de pago
+                    $tipo_pago = $cuarto['tipo_pago'];
+                    if ($tipo_pago === 'web') {
+                        $precio_ajustado = $precio_base * 0.7;
+                        $tipo_pago_desc = '<span style="color: #007bff;">Pagar por web</span>';
+                    } elseif ($tipo_pago === 'blackdays') {
+                        $precio_ajustado = $precio_base * 0.65;
+                        $tipo_pago_desc = '<span style="color: #28a745;">Black Days</span>';
+                    } else {
+                        $precio_ajustado = $precio_base;
+                        $tipo_pago_desc = '<span style="color: #6c757d;">Pagar en hotel</span>';
+                    }
 
-        // Mostrar detalles de las mesas seleccionadas
-        if (isset($_SESSION['reserva_mesa']) && !empty($_SESSION['reserva_mesa'])):
-            // Iterar sobre las mesas en la sesión
-            foreach ($_SESSION['reserva_mesa'] as $index => $mesa):
-                // Asegúrate de que cada mesa tenga los valores necesarios
-                if (isset($mesa['id_mesa'], $mesa['fecha_reserva'], $mesa['tipo_reserva'])):
-                    $id_mesa = $mesa['id_mesa']; // ID de la mesa
-                    $fecha_reserva = $mesa['fecha_reserva']; // Fecha de la reserva
-                    $tipo_reserva = $mesa['tipo_reserva']; // Tipo de reserva
+                    // Calcular el subtotal por cuarto
+                    $subtotal = $precio_ajustado * $dias_estadia;
+                    $total_general += $subtotal;
 
-                    // Mostrar los detalles de la mesa
+                    // Mostrar detalles de cada habitación
                     echo "<div style='border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;'>
-                            <div>
-                                <p style='margin: 0; font-size: 16px;'><strong>Mesa " . ($index + 1) . ":</strong></p>
-                                <p style='margin: 0; font-size: 14px;'>ID de la mesa: <strong>$id_mesa</strong></p>
-                                <p style='margin: 0; font-size: 14px;'>Fecha de reserva: <strong>$fecha_reserva</strong></p>
-                                <p style='margin: 0; font-size: 14px;'>Tipo de reserva: <strong>$tipo_reserva</strong></p>
-                                <p style='margin: 0; font-size: 14px;'>Total por mesas: <strong>S/ " . number_format($total_costo_mesas, 2) . "</strong></p>
-                            </div>
-                        </div>";
-                        $total_general += $total_costo_mesas; // Sumar el costo de las mesas al total general
+                        <div>
+                            <p style='margin: 0; font-size: 16px; color: #D69C4F;'><strong>Habitación " . ($index + 1) . ":<br> $descripcion_cuarto</strong></p>
+                            <p style='margin: 0; font-size: 14px;'>$dias_estadia noche(s) / $adultos adulto(s) / $ninos niño(s) / Nro $numero_cuarto</p>
+                            <p style='margin: 0; font-size: 14px;'>Tipo de pago: <strong>$tipo_pago_desc</strong></p>";
+
+                            // Mostrar precio normal tachado si aplica
+                            if ($tipo_pago === 'web' || $tipo_pago === 'blackdays') {
+                                echo "<p style='margin: 0; font-size: 14px;'>Precio normal: <strong style='text-decoration: line-through;'>S/ " . number_format($precio_base, 2) . "</strong></p>";
+                            } else {
+                                echo "<p style='margin: 0; font-size: 14px;'>Precio normal: <strong>S/ " . number_format($precio_base, 2) . "</strong></p>";
+                            }
+
+                            // Mostrar precio con descuento
+                            echo "<p style='margin: 0; font-size: 14px;'>Precio con descuento: <strong>S/ " . number_format($precio_ajustado, 2) . "</strong></p>
+                        </div>
+                    </div>";
+                endforeach;
+
+                // Mostrar detalles de las mesas seleccionadas
+                if (isset($_SESSION['reserva_mesa']) && !empty($_SESSION['reserva_mesa'])):
+                    // Iterar sobre las mesas en la sesión
+                    foreach ($_SESSION['reserva_mesa'] as $index => $mesa):
+                        // Asegúrate de que cada mesa tenga los valores necesarios
+                        if (isset($mesa['id_mesa'], $mesa['fecha_reserva'], $mesa['tipo_reserva'])):
+                            $id_mesa = $mesa['id_mesa']; // ID de la mesa
+                            $fecha_reserva = $mesa['fecha_reserva']; // Fecha de la reserva
+                            $tipo_reserva = $mesa['tipo_reserva']; // Tipo de reserva
+
+                            // Mostrar los detalles de la mesa
+                            echo "<div style='border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;'>
+                                    <div>
+                                        <p style='margin: 0; font-size: 16px; color: #D69C4F;'><strong>Mesa " . ($index + 1) . ":</strong></p>
+                                        <p style='margin: 0; font-size: 14px;'>ID de la mesa: <strong>$id_mesa</strong></p>
+                                        <p style='margin: 0; font-size: 14px;'>Fecha de reserva: <strong>$fecha_reserva</strong></p>
+                                        <p style='margin: 0; font-size: 14px;'>Tipo de reserva: <strong>$tipo_reserva</strong></p>
+                                        <p style='margin: 0; font-size: 14px;'>Total por mesas: <strong>S/ " . number_format($total_costo_mesas, 2) . "</strong></p>
+                                    </div>
+                                </div>";
+                                $total_general += $total_costo_mesas; // Sumar el costo de las mesas al total general
+                        else:
+                            echo "<p>Faltan datos para la mesa " . ($index + 1) . ".</p>";
+                        endif;
+                    endforeach;
                 else:
-                    echo "<p>Faltan datos para la mesa " . ($index + 1) . ".</p>";
+                    echo "<p>No se han reservado mesas.</p>";
                 endif;
-            endforeach;
-        else:
-            echo "<p>No se han reservado mesas.</p>";
-        endif;
 
-        // Mostrar el total general
-        echo "<div style='border-top: 1px solid #ddd; padding: 15px 0; display: flex; justify-content: flex-end; align-items: center;'>
-                <div style='margin-right: 10px;'>Subtotal:</div>
-                <div style='font-size: 20px; font-weight: bold;'>S/ " . number_format($total_general, 2) . "</div>
-              </div>";
+                // Mostrar el total general
+                echo "<div style='border-top: 1px solid #ddd; padding: 15px 0; display: flex; justify-content: flex-end; align-items: center;'>
+                        <div style='margin-right: 10px;'>Subtotal:</div>
+                        <div style='font-size: 20px; font-weight: bold;'>S/ " . number_format($total_general, 2) . "</div>
+                    </div>";
 
-    endif;
-    ?>
-</div>
-
-
-
-
-
-
-
-
-
-
-    <!-- Información del cliente -->
-    <div class="section guest-info">
-    <h3>Información del Cliente</h3>
-    <form method="POST" id="formulario">
-        <div class="row mb-2">
-            <div class="col-6">
-                <label for="nombre" class="form-label">Nombre:</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingresa tu nombre" required>
-            </div>
-            <div class="col-6">
-                <label for="apellido" class="form-label">Apellido:</label>
-                <input type="text" class="form-control" id="apellido" name="apellido" placeholder="Ingresa tu apellido" required>
-            </div>
+            endif;
+            ?>
         </div>
-        <div class="row mb-2">
-            <div class="col-6">
-                <label for="tipo_documento" class="form-label">Tipo de Documento:</label>
-                <select class="form-select" id="tipo_documento" name="tipo_documento" required>
-                    <option value="DNI">DNI</option>
-                    <option value="Pasaporte">Pasaporte</option>
-                    <option value="Cédula">Cédula</option>
-                </select>
+
+        <!-- Información del cliente -->
+        <div class="section guest-info">
+            <h3>Información del Cliente</h3>
+
+            <!-- Checkbox "Datos del huésped" -->
+            <div class="mb-0">
+                <label style='margin: 0; font-size: 16px; font-weight: bold;' for="usar_datos_huesped">Datos del huésped</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="usar_datos_huesped" checked>
+                    <label class="form-check-label" for="usar_datos_huesped">
+                        Registrar a los acompañantes en el hotel
+                    </label>
+                </div>
             </div>
-            <div class="col-6">
-                <label for="nro_documento" class="form-label">Número de Documento:</label>
-                <input type="text" class="form-control" id="nro_documento" name="nro_documento" placeholder="Número de documento" required>
-            </div>
+
+            <form method="POST" id="formulario">
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <label for="nombre" class="form-label">Nombre:</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingresa tu nombre" required>
+                    </div>
+                    <div class="col-6">
+                        <label for="apellido" class="form-label">Apellido:</label>
+                        <input type="text" class="form-control" id="apellido" name="apellido" placeholder="Ingresa tu apellido" required>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <label for="tipo_documento" class="form-label">Tipo de Documento:</label>
+                        <select class="form-select" id="tipo_documento" name="tipo_documento" required>
+                            <option value="DNI">DNI</option>
+                            <option value="Pasaporte">Pasaporte</option>
+                            <option value="Cédula">Cédula</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label for="nro_documento" class="form-label">Número de Documento:</label>
+                        <input type="text" class="form-control" id="nro_documento" name="nro_documento" placeholder="Número de documento" required>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <label for="celular" class="form-label">Celular:</label>
+                        <input type="text" class="form-control" id="celular" name="celular" placeholder="Número de celular" required>
+                    </div>
+                    <div class="col-6">
+                        <label for="pais" class="form-label">País:</label>
+                        <select class="form-select" id="pais" name="pais" required>
+                            <option value="Argentina">Argentina</option>
+                            <option value="Brasil">Brasil</option>
+                            <option value="Chile">Chile</option>
+                            <option value="México">México</option>
+                            <option value="Perú">Perú</option>
+                            <!-- Agregar más países según sea necesario -->
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-12">
+                        <label for="correo" class="form-label">Correo Electrónico:</label>
+                        <input type="email" class="form-control" id="correo" name="correo" placeholder="Ingresa tu correo" required>
+                    </div>
+                </div>
+
+                <div id="acompanhantes-container"></div>
+
+            </form>
         </div>
-        <div class="row mb-2">
-            <div class="col-6">
-                <label for="celular" class="form-label">Celular:</label>
-                <input type="text" class="form-control" id="celular" name="celular" placeholder="Número de celular" required>
-            </div>
-            <div class="col-6">
-                <label for="pais" class="form-label">País:</label>
-                <select class="form-select" id="pais" name="pais" required>
-                    <option value="Argentina">Argentina</option>
-                    <option value="Brasil">Brasil</option>
-                    <option value="Chile">Chile</option>
-                    <option value="México">México</option>
-                    <option value="Perú">Perú</option>
-                    <!-- Agregar más países según sea necesario -->
-                </select>
-            </div>
-        </div>
-        <div class="row mb-2">
-            <div class="col-12">
-                <label for="correo" class="form-label">Correo Electrónico:</label>
-                <input type="email" class="form-control" id="correo" name="correo" placeholder="Ingresa tu correo" required>
-            </div>
-        </div>
-    </form>
-</div>
 
 
+        <script>
+            // Obtener las descripciones desde PHP
+            let descripciones = <?php echo json_encode($descripciones); ?>;
+            document.getElementById('usar_datos_huesped').addEventListener('change', function() {
+                let container = document.getElementById('acompanhantes-container');
+                container.innerHTML = ''; // Limpiar el contenedor de acompañantes cada vez que se cambia el estado del checkbox
+                
+                if (!this.checked) {
+                    // Si el checkbox está desmarcado, agregar formularios para los acompañantes
+                    let habitaciones = <?php echo json_encode($_SESSION['cuartos_seleccionados']); ?>;  // Obtener las habitaciones desde PHP
+                    let adultos = <?php echo json_encode($_SESSION['adultos']); ?>;  // Obtener la cantidad de adultos desde PHP
+                    let ninos = <?php echo json_encode($_SESSION['ninos']); ?>;  // Obtener la cantidad de niños desde PHP
 
-<!-- Información de pago con resumen de reserva -->
-<div class="section payment-info" style="font-family: Arial, sans-serif; padding: 15px; background-color: #f9f9f9; border-radius: 8px;">
-    <h3 style="text-align: center; font-size: 22px; color: #333;">Resumen de la Reserva</h3>
+                    // Recorrer las habitaciones y agregar formularios de acompañantes
+                    habitaciones.forEach((habitacion, index) => {
+                        // Calcular el total de acompañantes (adultos + niños)
+                        let total_acompanhantes = (parseInt(adultos[index]) || 0) + (parseInt(ninos[index]) || 0);
+                        
+                        if (index == 0) {
+                            total_acompanhantes = total_acompanhantes - 1;
+                        }
 
-    <?php 
-    $total_general = 0; // Inicializar el total general
+                        // Crear el contenedor de la habitación con el ícono
+                        let habitacionContenedor = document.createElement('div');
+                        habitacionContenedor.classList.add('habitacion-contenedor');
+                        habitacionContenedor.setAttribute('style', 'cursor: pointer; margin-bottom: 15px;');
 
-    // Mostrar el resumen de habitaciones si existen
-    if (!empty($cuartos_seleccionados)): 
-        $total_habitaciones = count($cuartos_seleccionados);
-        
-        echo "<p style='font-size: 16px; color: #555; text-align: center;'><strong>Total de habitaciones:</strong> $total_habitaciones</p>";
+                        // Crear el título de la habitación con el ícono
+                        let tituloHabitacion = document.createElement('div');
+                        tituloHabitacion.classList.add('habitacion-titulo');
+                        tituloHabitacion.setAttribute('style', 'display: flex; justify-content: flex-start; align-items: center;');
+                        tituloHabitacion.innerHTML = `
+                            <i class="fa fa-chevron-down" aria-hidden="true" style="color: #D69C4F;"></i>
+                            <h4 style="margin: 0; margin-left: 7px; margin-bottom: 7px; font-size: 16px; font-weight: bold; color: #D69C4F;">
+                                Habitación ${index + 1}: ${descripciones[index] || 'Descripción no disponible'}
+                            </h4>
+                        `;
+                        habitacionContenedor.appendChild(tituloHabitacion);  // Añadir título e ícono al contenedor
 
-        foreach ($cuartos_seleccionados as $index => $cuarto): 
-            $numero_cuarto = '';
-            $precio_base = 0;
-        
-            // Obtener el precio de la habitación y el número
-            foreach ($habitaciones_info as $habitacion) {
-                if ($habitacion['id_cuarto'] == $cuarto['id_cuarto']) {
-                    $numero_cuarto = $habitacion['numero'];
-                    $precio_base = $habitacion['precio_base'];
-                    break;
+                        // Crear un contenedor oculto para los formularios de acompañantes
+                        let formulariosContainer = document.createElement('div');
+                        formulariosContainer.classList.add('formularios-container');
+                        formulariosContainer.style.display = 'none'; // Ocultar los formularios por defecto
+
+                        // Crear los formularios de acompañantes
+                        for (let i = 0; i < total_acompanhantes; i++) {
+                            let div = document.createElement('div');
+                            div.classList.add('acompanhante-form');
+                            div.innerHTML = `
+                                <h4 style='margin: 0; font-size: 16px; font-weight: bold; color: #D69C4F;'>Acompañante ${i + 1}</h4>
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <label for="nombre_acompanhante_${index}_${i}" class="form-label">Nombre:</label>
+                                        <input type="text" class="form-control" id="nombre_acompanhante_${index}_${i}" name="nombre_acompanhante[${index}][${i}]" placeholder="Ingresa el nombre" required>
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="apellido_acompanhante_${index}_${i}" class="form-label">Apellido:</label>
+                                        <input type="text" class="form-control" id="apellido_acompanhante_${index}_${i}" name="apellido_acompanhante[${index}][${i}]" placeholder="Ingresa el apellido" required>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <label for="tipo_documento_acompanhante_${index}_${i}" class="form-label">Tipo de Documento:</label>
+                                        <select class="form-select" id="tipo_documento_acompanhante_${index}_${i}" name="tipo_documento_acompanhante[${index}][${i}]" required>
+                                            <option value="DNI">DNI</option>
+                                            <option value="Pasaporte">Pasaporte</option>
+                                            <option value="Cédula">Cédula</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="nro_documento_acompanhante_${index}_${i}" class="form-label">Número de Documento:</label>
+                                        <input type="text" class="form-control" id="nro_documento_acompanhante_${index}_${i}" name="nro_documento_acompanhante[${index}][${i}]" placeholder="Número de documento" required>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <label for="celular_acompanhante_${index}_${i}" class="form-label">Celular:</label>
+                                        <input type="text" class="form-control" id="celular_acompanhante_${index}_${i}" name="celular_acompanhante[${index}][${i}]" placeholder="Número de celular" required>
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="pais_acompanhante_${index}_${i}" class="form-label">País:</label>
+                                        <select class="form-select" id="pais_acompanhante_${index}_${i}" name="pais_acompanhante[${index}][${i}]" required>
+                                            <option value="Argentina">Argentina</option>
+                                            <option value="Brasil">Brasil</option>
+                                            <option value="Chile">Chile</option>
+                                            <option value="México">México</option>
+                                            <option value="Perú">Perú</option>
+                                            <!-- Agregar más países según sea necesario -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-12">
+                                        <label for="correo_acompanhante_${index}_${i}" class="form-label">Correo Electrónico:</label>
+                                        <input type="email" class="form-control" id="correo_acompanhante_${index}_${i}" name="correo_acompanhante[${index}][${i}]" placeholder="Correo electrónico" required>
+                                    </div>
+                                </div>
+                            `;
+                            formulariosContainer.appendChild(div);  // Agregar el formulario de acompañante al contenedor de formularios
+                        }
+
+                        habitacionContenedor.appendChild(formulariosContainer); // Añadir los formularios al contenedor de la habitación
+                        container.appendChild(habitacionContenedor);  // Añadir el contenedor de la habitación al contenedor principal
+
+                        // Añadir la funcionalidad para mostrar/ocultar los formularios al hacer clic
+                        tituloHabitacion.addEventListener('click', function() {
+                            let icono = tituloHabitacion.querySelector('i');
+                            if (formulariosContainer.style.display === 'none') {
+                                formulariosContainer.style.display = 'block';
+                                icono.classList.remove('fa-chevron-down');
+                                icono.classList.add('fa-chevron-up');
+                            } else {
+                                formulariosContainer.style.display = 'none';
+                                icono.classList.remove('fa-chevron-up');
+                                icono.classList.add('fa-chevron-down');
+                            }
+                        });
+                    });
                 }
-            }
-        
-            // Calcular precio ajustado
-            $tipo_pago = $cuarto['tipo_pago'];
-            if ($tipo_pago === 'web') {
-                $precio_ajustado = $precio_base * 0.7;
-            } elseif ($tipo_pago === 'blackdays') {
-                $precio_ajustado = $precio_base * 0.65;
-            } else {
-                $precio_ajustado = $precio_base;
-            }
-        
-            // Mostrar el precio de cada habitación
-            echo "<p style='font-size: 14px; color: #555; text-align: center;'>Habitación " . ($index + 1) . " (Nro: $numero_cuarto) x <strong> $dias_estadia días = S/ " . number_format($precio_ajustado * $dias_estadia, 2) . "</strong></p>";
-
-            // Sumar al total general
-            $subtotal = $precio_ajustado * $dias_estadia;
-            $total_general += $subtotal;
-        endforeach;
-    else:
-        echo "<p style='text-align: center; color: #888;'>No hay información disponible sobre las habitaciones seleccionadas.</p>";
-    endif;
-
-    // Mostrar el resumen de mesas si existen reservas
-    if (!empty($reserva_mesa)): 
-       // echo "<h4 style='font-size: 18px; color: #333; text-align: center; margin-top: 20px;'>Mesas Reservadas</h4>";
-        foreach ($reserva_mesa as $index => $mesa) {
-            $tipo_mesa = $mesa['tipo_reserva'];
-            //$costo_mesa = $mesa['costo_mesa'];
-
-            echo "<p style='font-size: 14px; color: #555; text-align: center;'>Mesa " . ($index + 1) . " (Tipo: $tipo_mesa) = <strong>S/ "  . number_format($total_costo_mesas, 2) ."</strong></p>";
-
-            $total_general += $total_costo_mesas;
-        }
-    else:
-        echo "<p style='text-align: center; color: #888;'>No hay información disponible sobre las mesas reservadas.</p>";
-    endif;
-
-    // Mostrar el total general
-    echo "<p style='font-size: 18px; font-weight: bold; color: #333; text-align: center; margin-top: 20px;'><strong>Total a pagar:</strong> S/ " . number_format($total_general, 2) . "</p>";
-    ?>
-
-    <!-- Botón para pagar -->
-    <div style="text-align: center; margin-top: 20px;">
-        <button type="submit" form="formulario" class="btn btn-warning" style="padding: 10px 20px; font-size: 16px; border-radius: 5px; background-color: #ffc107; border: none; cursor: pointer;">Pagar</button>
-    </div>
-</div>
+            });
+        </script>
 
 
+        <!-- Información de pago con resumen de reserva -->
+        <div class="section payment-info" style="font-family: Arial, sans-serif; padding: 15px; background-color: #f9f9f9; border-radius: 8px;">
+            <h3 style="text-align: center; font-size: 22px; color: #333;">Resumen de la Reserva</h3>
 
+            <?php 
+            $total_general = 0; // Inicializar el total general
 
+            // Mostrar el resumen de habitaciones si existen
+            if (!empty($cuartos_seleccionados)): 
+                $total_habitaciones = count($cuartos_seleccionados);
+                
+                echo "<p style='font-size: 16px; color: #555; text-align: center;'><strong>Total de habitaciones:</strong> $total_habitaciones</p>";
 
+                foreach ($cuartos_seleccionados as $index => $cuarto): 
+                    $numero_cuarto = '';
+                    $precio_base = 0;
+                
+                    // Obtener el precio de la habitación y el número
+                    foreach ($habitaciones_info as $habitacion) {
+                        if ($habitacion['id_cuarto'] == $cuarto['id_cuarto']) {
+                            $numero_cuarto = $habitacion['numero'];
+                            $precio_base = $habitacion['precio_base'];
+                            break;
+                        }
+                    }
+                
+                    // Calcular precio ajustado
+                    $tipo_pago = $cuarto['tipo_pago'];
+                    if ($tipo_pago === 'web') {
+                        $precio_ajustado = $precio_base * 0.7;
+                    } elseif ($tipo_pago === 'blackdays') {
+                        $precio_ajustado = $precio_base * 0.65;
+                    } else {
+                        $precio_ajustado = $precio_base;
+                    }
+                
+                    // Mostrar el precio de cada habitación
+                    echo "<p style='font-size: 14px; color: #555; text-align: center;'>Habitación " . ($index + 1) . " (Nro: $numero_cuarto) x <strong> $dias_estadia días = S/ " . number_format($precio_ajustado * $dias_estadia, 2) . "</strong></p>";
+
+                    // Sumar al total general
+                    $subtotal = $precio_ajustado * $dias_estadia;
+                    $total_general += $subtotal;
+                endforeach;
+            else:
+                echo "<p style='text-align: center; color: #888;'>No hay información disponible sobre las habitaciones seleccionadas.</p>";
+            endif;
+
+            // Mostrar el resumen de mesas si existen reservas
+            if (!empty($reserva_mesa)): 
+            // echo "<h4 style='font-size: 18px; color: #333; text-align: center; margin-top: 20px;'>Mesas Reservadas</h4>";
+                foreach ($reserva_mesa as $index => $mesa) {
+                    $tipo_mesa = $mesa['tipo_reserva'];
+                    //$costo_mesa = $mesa['costo_mesa'];
+
+                    echo "<p style='font-size: 14px; color: #555; text-align: center;'>Mesa " . ($index + 1) . " (Tipo: $tipo_mesa) = <strong>S/ "  . number_format($total_costo_mesas, 2) ."</strong></p>";
+
+                    $total_general += $total_costo_mesas;
+                }
+            else:
+                echo "<p style='text-align: center; color: #888;'>No hay información disponible sobre las mesas reservadas.</p>";
+            endif;
+
+            // Mostrar el total general
+            echo "<p style='font-size: 18px; font-weight: bold; color: #333; text-align: center; margin-top: 20px;'><strong>Total a pagar:</strong> S/ " . number_format($total_general, 2) . "</p>";
+            ?>
+            
+            <!-- Botón para pagar -->
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="submit" form="formulario" class="btn btn-warning">Pagar</button>
+            </div>
+        </div>
     </div>
 </body>
 </html> 

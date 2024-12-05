@@ -233,6 +233,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .nav-link:hover {
             text-decoration: underline;
         }
+        .btn-warning {
+            background-color: #D69C4F;
+            color: white;
+            border: none;
+            padding: 8px 16px 8px 16px;
+            margin: 0.8px;
+            cursor: pointer;
+        }
+        .btn-warning:hover {
+            background-color: #c88942;
+        }
     </style>
 </head>
 <body>

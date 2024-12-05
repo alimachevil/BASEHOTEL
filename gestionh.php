@@ -594,7 +594,7 @@ for ($i = 0; $i < $habitaciones; $i++) {
 
                                 <!-- Tipo de Pago -->
                                 <p class="form-label">Precio por noche</p>
-                                <p class="precio-noche"> <?php echo htmlspecialchars($seleccion['precio']); ?> x <?php echo $dias_estadia; ?> días</p> 
+                                <p class="precio-noche"> <?php echo htmlspecialchars($seleccion['precio']); ?> x <?php echo $dias_estadia; ?> noches</p> 
 
                                 <!-- Contenedor de pago y precio final -->
                                 <div class="payment-container">
