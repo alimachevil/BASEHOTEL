@@ -25,8 +25,7 @@ $check_out = $_SESSION['check_out'];
 $cuartos_seleccionados = $_SESSION['cuartos_seleccionados']; // Array con habitaciones seleccionadas
 $adultos = $_SESSION['adultos'];  // Adultos por habitación
 $ninos = $_SESSION['ninos'];    // Niños por habitación
-$total_costo_mesas = $_SESSION['total_costo_mesas'];
-
+$location = $_SESSION['location'];
 
 // Conexión a la base de datos
 $host = 'localhost';
@@ -93,15 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $correo = $_POST['correo'];
     $celular = $_POST['celular'];
     $pais = $_POST['pais'];
-
-    // Calcular el total de la reserva de hotel
-    $total_pago = 0;
-    foreach ($habitaciones_info as $habitacion) {
-        $total_pago += $habitacion['precio_base'] * $dias_estadia;
-    }
-
-    // Sumar el costo de las mesas al total de la reserva
-    $total_pago += $total_costo_mesas;
+    $total_general = isset($_SESSION['total_general']) ? $_SESSION['total_general'] : 0;
 
     // Insertar datos del cliente en la tabla `clientes`
     $query_cliente = "
@@ -116,12 +107,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Insertar la reserva en la tabla `reservas`
     $fecha_reserva = date('Y-m-d H:i:s'); // Fecha actual
     $id_promocion = null; // Asumimos sin promociones
-    $id_hotel = 1; // Asumimos un hotel por defecto
+    $id_hotel = $location;
 
     // Insertar la reserva en la tabla `reservas` con el total de pago
     $query_reserva = "
         INSERT INTO reservas (fecha_reserva, fecha_checkin, fecha_checkout, total_pago, id_cliente, id_promocion, id_hotel)
-        VALUES ('$fecha_reserva', '$check_in', '$check_out', $total_pago, $id_cliente, " . ($id_promocion ? $id_promocion : 'NULL') . ", $id_hotel)
+        VALUES ('$fecha_reserva', '$check_in', '$check_out', $total_general, $id_cliente, " . ($id_promocion ? $id_promocion : 'NULL') . ", $id_hotel)
     ";
 
     if (!$conn->query($query_reserva)) {
@@ -514,7 +505,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php 
             // Verifica si la sesión tiene los datos necesarios
-            if (isset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['cuartos_seleccionados'], $_SESSION['adultos'], $_SESSION['ninos'], $habitaciones_info, $_SESSION['reserva_mesa'])): 
+            if (isset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['cuartos_seleccionados'], $_SESSION['adultos'], $_SESSION['ninos'], $habitaciones_info)): 
                 $total_general = 0; // Variable para el total general de la reserva
 
                 // Calcula los días de estadía
@@ -586,6 +577,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $id_mesa = $mesa['id_mesa']; // ID de la mesa
                             $fecha_reserva = $mesa['fecha_reserva']; // Fecha de la reserva
                             $tipo_reserva = $mesa['tipo_reserva']; // Tipo de reserva
+                            $precio_reservam = $mesa['precio_reservam']; // Costo de reserva
 
                             // Mostrar los detalles de la mesa
                             echo "<div style='border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;'>
@@ -594,10 +586,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <p style='margin: 0; font-size: 14px;'>ID de la mesa: <strong>$id_mesa</strong></p>
                                         <p style='margin: 0; font-size: 14px;'>Fecha de reserva: <strong>$fecha_reserva</strong></p>
                                         <p style='margin: 0; font-size: 14px;'>Tipo de reserva: <strong>$tipo_reserva</strong></p>
-                                        <p style='margin: 0; font-size: 14px;'>Total por mesas: <strong>S/ " . number_format($total_costo_mesas, 2) . "</strong></p>
+                                        <p style='margin: 0; font-size: 14px;'>Total por mesas: <strong>S/ " . number_format($precio_reservam, 2) . "</strong></p>
                                     </div>
                                 </div>";
-                                $total_general += $total_costo_mesas; // Sumar el costo de las mesas al total general
+                                $total_general += $precio_reservam; // Sumar el costo de las mesas al total general
                         else:
                             echo "<p>Faltan datos para la mesa " . ($index + 1) . ".</p>";
                         endif;
@@ -846,7 +838,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 
                     // Mostrar el precio de cada habitación
-                    echo "<p style='font-size: 14px; color: #555; text-align: center;'>Habitación " . ($index + 1) . " (Nro: $numero_cuarto) x <strong> $dias_estadia días = S/ " . number_format($precio_ajustado * $dias_estadia, 2) . "</strong></p>";
+                    echo "<p style='font-size: 14px; color: #555; text-align: center;'>Habitación " . ($index + 1) . " (Nro: $numero_cuarto) x <strong> $dias_estadia noches = S/ " . number_format($precio_ajustado * $dias_estadia, 2) . "</strong></p>";
 
                     // Sumar al total general
                     $subtotal = $precio_ajustado * $dias_estadia;
@@ -861,11 +853,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // echo "<h4 style='font-size: 18px; color: #333; text-align: center; margin-top: 20px;'>Mesas Reservadas</h4>";
                 foreach ($reserva_mesa as $index => $mesa) {
                     $tipo_mesa = $mesa['tipo_reserva'];
-                    //$costo_mesa = $mesa['costo_mesa'];
+                    $precio_reservam = $mesa['precio_reservam'];
 
-                    echo "<p style='font-size: 14px; color: #555; text-align: center;'>Mesa " . ($index + 1) . " (Tipo: $tipo_mesa) = <strong>S/ "  . number_format($total_costo_mesas, 2) ."</strong></p>";
+                    echo "<p style='font-size: 14px; color: #555; text-align: center;'>Mesa " . ($index + 1) . " (Tipo: $tipo_mesa) = <strong>S/ "  . number_format($precio_reservam, 2) ."</strong></p>";
 
-                    $total_general += $total_costo_mesas;
+                    $total_general += $precio_reservam;
                 }
             else:
                 echo "<p style='text-align: center; color: #888;'>No hay información disponible sobre las mesas reservadas.</p>";
@@ -873,6 +865,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Mostrar el total general
             echo "<p style='font-size: 18px; font-weight: bold; color: #333; text-align: center; margin-top: 20px;'><strong>Total a pagar:</strong> S/ " . number_format($total_general, 2) . "</p>";
+            $_SESSION['total_general'] = $total_general;
             ?>
             
             <!-- Botón para pagar -->

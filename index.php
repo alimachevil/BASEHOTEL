@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Guarda las fechas de Check-in y Check-out en la sesión
     $_SESSION['check_in'] = $_POST['check_in'];
     $_SESSION['check_out'] = $_POST['check_out'];
-
+    $_SESSION['location'] = $_POST['location'];
     // Redirigir a la página hyh.php
     header("Location: hyh.php");
     exit;
@@ -324,10 +324,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="location" class="form-label">Elige la sede</label>
                     <select class="form-select" id="location" name="location">
                         <option value="" disabled selected>Selecciona una opción</option>
-                        <option value="lima">Lima</option>
-                        <option value="cusco">Cusco</option>
-                        <option value="arequipa">Arequipa</option>
-                        <option value="tacna">Tacna</option>
+                        <option value="2">Lima</option>
+                        <option value="4">Cusco</option>
+                        <option value="1">Arequipa</option>
+                        <option value="8">Tacna</option>
                     </select>
                 </div>
             </div>

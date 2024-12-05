@@ -69,13 +69,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reservar_mesa'])) {
         $fecha_reserva = $_POST['fecha_reserva'];
         $tipo_reserva = $_POST['tipo_reserva']; // Desayuno, almuerzo, cena
 
-        // Guardar la información de la mesa en la sesión
-        $_SESSION['reserva_mesa'][] = [
-            'id_mesa' => $id_mesa,
-            'fecha_reserva' => $fecha_reserva,
-            'tipo_reserva' => $tipo_reserva
-        ];
-
         // Obtener el precio de la mesa
         $sql_precio_mesa = "SELECT precio_reservam FROM mesas WHERE id_mesa = ?";
         $stmt_precio_mesa = $conn->prepare($sql_precio_mesa);
@@ -84,6 +77,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reservar_mesa'])) {
         $result_precio_mesa = $stmt_precio_mesa->get_result();
         $row_precio_mesa = $result_precio_mesa->fetch_assoc();
         $total_costo_mesas = $row_precio_mesa['precio_reservam'];
+
+        // Guardar la información de la mesa en la sesión
+        $_SESSION['reserva_mesa'][] = [
+            'id_mesa' => $id_mesa,
+            'fecha_reserva' => $fecha_reserva,
+            'tipo_reserva' => $tipo_reserva,
+            'precio_reservam' => $total_costo_mesas
+        ];
 
         // Actualizar el costo total en la sesión
         if (isset($_SESSION['total_costo_mesas'])) {
