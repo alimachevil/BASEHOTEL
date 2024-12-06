@@ -82,7 +82,12 @@ foreach ($cuartos_seleccionados as $cuarto) {
 // Cálculo de días de estadía
 $dias_estadia = calcularDiasEstadia($check_in, $check_out);
 
+// por alguna razon no tomaba el id, por eso tenia que poner esto
+$id_reserva = null;                                              
+
 // Verifica si el formulario de cliente se envió
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validar y guardar los datos del cliente
     $nombre = $_POST['nombre'];
@@ -185,14 +190,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     }    
 
-    // Guardar el ID de reserva en sesión
+    // Guardar el ID de reserva en sesión y redirigir a la página de confirmación
     $_SESSION['id_reserva'] = $id_reserva;
-    $_SESSION['mostrar_modal'] = true; // Agregar esta línea para indicar que se debe mostrar el modal
-
-    // Redirigir al mismo formulario o a la página de confirmación
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
+    header('Location: confirmacion_pago.php');
+    exit();
 }
+
+// Obtener el ID de reserva desde la sesión (si existe)
+$id_reserva = isset($_SESSION['id_reserva']) ? $_SESSION['id_reserva'] : null;      //  <<<<<<<<<<<<AGREGUE
+
+
 ?>
 
 
@@ -869,52 +876,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['total_general'] = $total_general;
             ?>
             
-            <!-- Botón para pagar -->
+               
+                <!-- Botón para pagar -->
             <div style="text-align: center; margin-top: 20px;">
-                <button type="submit" form="formulario" class="btn btn-warning">Pagar</button>
+                <button type="submit" form="formulario" class="btn btn-warning" style="padding: 10px 20px; font-size: 16px; border-radius: 5px; background-color: #ffc107; border: none; cursor: pointer;">Pagar</button>
             </div>
         </div>
-
-        <!-- Modal de Confirmación -->
-        <div id="confirmacionModal" class="modal" style="display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center;">
-            <div style="margin: auto; padding: 30px; width: 40%; background: linear-gradient(145deg, #ffffff, #f3f3f3); border-radius: 15px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); text-align: center;">
-                <!-- Mensaje de Confirmación -->
-                <h3 style="font-size: 24px; color: #333; font-weight: bold; margin-bottom: 20px;">¡Reserva Confirmada!</h3>
-
-                <!-- Ícono de check -->
-                <div style="width: 80px; height: 80px; margin: 0 auto 20px; background-color: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" width="50px" height="50px">
-                        <path d="M9.00002 16.2L4.80002 12L3.40002 13.4L9.00002 19L21 7.00001L19.6 5.60001L9.00002 16.2Z"/>
-                    </svg>
-                </div>
-                <!-- Mensaje de Confirmación -->
-                <p style="font-size: 18px; color: #666; margin-bottom: 15px;">Tu reserva ha sido registrada exitosamente.</p>
-                <p style="font-size: 20px; font-weight: bold; color: #333; margin-bottom: 25px;">ID de la Reserva: <span id="idReservaModal" style="color: #007bff;">
-                    <?php echo isset($_SESSION['id_reserva']) ? $_SESSION['id_reserva'] : 'No disponible'; ?>
-                </span></p>
-            
-                <!-- Opciones -->
-                <h4 style="color: #444; font-size: 18px; font-weight: bold; margin-bottom: 15px;">¿Desea ver tu factura electrónica?</h4>
-                <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-                    <button onclick="window.location.href='ver_factura.php';"  
-                        style="padding: 12px 25px; font-size: 16px; background-color: #D69C4F; color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;">
-                        Descargar Factura
-                    </button>
-                    <button onclick="location.href='index.php';" 
-                        style="padding: 12px 25px; font-size: 16px; background-color: #6c757d; color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;">
-                        Regresar a Inicio
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <script>
-            // Mostrar el modal si la variable de sesión 'mostrar_modal' está activa
-            <?php if (isset($_SESSION['mostrar_modal']) && $_SESSION['mostrar_modal'] === true): ?>
-                document.getElementById('confirmacionModal').style.display = 'flex';
-                <?php unset($_SESSION['mostrar_modal']); ?> // Limpiar la variable para evitar que se muestre en el futuro
-            <?php endif; ?>
-        </script>
     </div>
 </body>
 </html> 
