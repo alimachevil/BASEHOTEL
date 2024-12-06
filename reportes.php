@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $reporteSeleccionado) {
                 $stmt->bind_param("ss", $fechaInicio, $fechaFin);
                 $stmt->execute();
                 $resultado = $stmt->get_result();
-                $campos = ['Nombre Cliente', 'Apellido Cliente', 'Documento Cliente', 'Tipo Documento Cliente', 'Celular Cliente', 'Correo Cliente', 'Pais Cliente', 'Nombre Acompañante', 'Apellido Acompañante', 'Documento Acompañante', 'Tipo Documento Acompañante', 'Celular Acompañante', 'Correo Acompañante', 'Pais Acompañante']; // Encabezados de tabla
+                $campos = ['Nombre', 'Apellido', 'Documento', 'Tipo Documento', 'Celular', 'Correo', 'Pais']; // Encabezados de tabla
             }
             break;
 
