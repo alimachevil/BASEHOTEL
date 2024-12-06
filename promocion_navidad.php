@@ -1,31 +1,6 @@
 <?php
-// Inicia la sesión
+// Inicio de sesión y conexión a la base de datos
 session_start();
-
-// Función para calcular los días de estadía
-function calcularDiasEstadia($check_in, $check_out) {
-    $fecha1 = new DateTime($check_in);
-    $fecha2 = new DateTime($check_out);
-    return $fecha2->diff($fecha1)->days;
-}
-
-// Verifica si las fechas, habitaciones seleccionadas, adultos y niños están en sesión
-if (!isset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['cuartos_seleccionados'], $_SESSION['adultos'], $_SESSION['ninos'])) {
-    header('Location: index.php'); // Redirigir al inicio si no hay datos
-    exit();
-}
-
-// Verifica si la reserva de mesa está en la sesión (de reserva_restaurante.php)
-$reserva_mesa = isset($_SESSION['reserva_mesa']) ? $_SESSION['reserva_mesa'] : [];
-$total_costo_mesas = isset($_SESSION['total_costo_mesas']) ? $_SESSION['total_costo_mesas'] : 0;
-
-// Variables de sesión
-$check_in = $_SESSION['check_in'];
-$check_out = $_SESSION['check_out'];
-$cuartos_seleccionados = $_SESSION['cuartos_seleccionados']; // Array con habitaciones seleccionadas
-$adultos = $_SESSION['adultos'];  // Adultos por habitación
-$ninos = $_SESSION['ninos'];    // Niños por habitación
-$location = $_SESSION['location'];
 
 // Conexión a la base de datos
 $host = 'localhost';
@@ -34,15 +9,12 @@ $pass = '';
 $dbname = 'hotel_db';
 $conn = new mysqli($host, $user, $pass, $dbname);
 
-// Verificar la conexión
-if ($conn->connect_error) {
-    die("Error en la conexión a la base de datos: " . $conn->connect_error);
+// Función para calcular los días de estadía
+function calcularDiasEstadia($check_in, $check_out) {
+    $fecha1 = new DateTime($check_in);
+    $fecha2 = new DateTime($check_out);
+    return $fecha2->diff($fecha1)->days;
 }
-
-// Extraer los IDs de las habitaciones seleccionadas
-$ids = implode(',', array_map(function($cuarto) {
-    return intval($cuarto['id_cuarto']);
-}, $cuartos_seleccionados));
 
 // Consultar información de las habitaciones seleccionadas (ahora con "descripcion")
 $habitaciones_info = [];
@@ -81,6 +53,33 @@ foreach ($cuartos_seleccionados as $cuarto) {
 
 // Cálculo de días de estadía
 $dias_estadia = calcularDiasEstadia($check_in, $check_out);
+
+// Configuración específica para la promoción de Navidad (ID 1)
+$promocion_id = 1;
+$_SESSION['fechas'] = [
+    'checkin' => '2024-12-24',
+    'checkout' => '2024-12-26'
+];
+$_SESSION['habitaciones'] = [
+    [
+        'id' => 201, // ID de la habitación predefinida
+        'descripcion' => 'Habitación para 2 adultos con desayunos incluidos',
+        'precio' => 120.00 // Precio por noche
+    ]
+];
+$_SESSION['promocion'] = [
+    'id_promocion' => $promocion_id,
+    'descuento' => 0.10 // 10% de descuento
+];
+$_SESSION['total_sin_descuento'] = 240.00; // Total antes del descuento (120.00 * 2 noches)
+$_SESSION['total'] = $_SESSION['total_sin_descuento'] - ($_SESSION['total_sin_descuento'] * $_SESSION['promocion']['descuento']); // Total con descuento
+
+// Mostrar la página de promoción con los detalles configurados
+$fechas = $_SESSION['fechas'];
+$habitaciones = $_SESSION['habitaciones'];
+$promocion = $_SESSION['promocion'];
+$total_sin_descuento = $_SESSION['total_sin_descuento'];
+$total = $_SESSION['total'];
 
 // Verifica si el formulario de cliente se envió
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -194,14 +193,314 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 ?>
+
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Habitaciones</title>
- <!-- Contenido -->
- <div class="container">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Agregar FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        
+        body {
+            font-family: 'Lato', 'Roboto', sans-serif !important;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+        }
+        .header-container {
+            width: 100%;
+            max-width: 1140px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            height: 69px;
+        }
+        .header-left img {
+            height: 50px;
+        }
+        .header-right nav {
+            display: flex;
+            gap: 20px;
+        }
+        .header-right nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .header-right nav a:hover {
+            text-decoration: underline;
+        }
+
+        .progress-bar-container {
+            padding: 11px 15px;
+            max-width: 1140px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .progress-bar-header {
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .step {
+            text-align: center;
+            flex: 1;
+        }
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            color: black;
+            font-weight: bold;
+        }
+        .step-circle.active {
+            background-color: #D69C4F;
+        }
+        .step-line {
+            flex: 1;
+            height: 2px;
+            background-color: #ccc;
+            margin: auto;
+        }
+        .step-line.active {
+            background-color: #D69C4F;
+        }
+
+        .container {
+            margin: 20px auto;
+            max-width: 1200px;
+            padding: 0 40px 40px 40px;
+        }
+        h2 {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .form-section {
+            background-color: transparent;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .form-label {
+            font-weight: bold;
+        }
+
+        /* Estilo del Select de Monedas */
+        .form-select {
+            border: none;
+            border-bottom: 2px solid #000;
+            border-radius: 0px;
+            background-color: transparent;
+            box-shadow: none;
+            padding-left: 0;
+            font-weight: bold;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-bottom: 2px solid #D69C4F;
+        }
+
+        /* Estilo del contenedor de cada habitación */
+        .habitacion-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .habitacion-info {
+            flex-basis: 70%;
+        }
+
+        .habitacion-info img {
+            height: px;
+            width: auto;
+        }
+
+        .habitacion-options {
+            flex-basis: 28%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .habitacion-options p {
+            margin: 5px 0;
+        }
+
+        .btn-warning {
+            background-color: #D69C4F;
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-warning:hover {
+            background-color: #c88942;
+        }
+
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .section {
+            flex: 1;
+            min-width: 300px;
+        }
+        .section h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .reservation-details,
+        .guest-info,
+        .payment-info {
+            padding: 10px;
+        }
+        .reservation-details p,
+        .guest-info label,
+        .payment-info label {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .guest-info input,
+        .payment-info input {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        /* Contenedor del checkbox y el texto */
+        .form-check {
+            display: flex;
+            justify-content: flex-start;  /* Alinea todo el contenido a la izquierda */
+            margin: 0;  /* Asegura que no haya márgenes automáticos que puedan estar centrando el contenido */
+        }
+
+        /* Asegurarse de que el checkbox tenga un tamaño adecuado */
+        .form-check-input {
+            margin-right: 8px;  /* Espacio entre el checkbox y el texto */
+            transform: scale(1);  /* Asegura que el checkbox no se agrande */
+        }
+
+        .payment-info {
+            text-align: center;
+        }
+        .payment-info img {
+            width: 50px;
+            margin: 5px;
+        }
+        .total {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ff8000;
+            text-align: right;
+            margin-top: 10px;
+        }
+        button {
+            background-color: #ff8000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #e06900;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="header-left">
+                <img src="images/logo.png" alt="Logo del Hotel">
+            </div>
+            <div class="header-right">
+                <nav>
+                    <a href="#">OFERTAS</a>
+                    <a href="#">DESTINOS</a>
+                    <a href="#">LIFE</a>
+                    <a href="#">RESTAURANTES</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Barra de Progreso -->
+    <div class="progress-bar-container">
+        <h1 class="progress-bar-header">Casa Andina Standard Talara</h1>
+        <div class="progress-bar">
+            <div class="step">
+                <div class="step-circle active" id="circle-1">1</div>
+                <div>Huéspedes & Habitaciones</div>
+            </div>
+            <div class="step-line active" id="line-1"></div>
+            <div class="step">
+                <div class="step-circle active" id="circle-2">2</div>
+                <div>Selecciona Habitaciones y Tarifa</div>
+            </div>
+            <div class="step-line active" id="line-2"></div>
+            <div class="step">
+                <div class="step-circle active" id="circle-3">3</div>
+                <div>Fechas de Reserva Restaurante</div>
+            </div>
+            <div class="step-line active" id="line-3"></div>
+            <div class="step">
+                <div class="step-circle active" id="circle-4">4</div>
+                <div>Monto Total</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido -->
+    <div class="container">
         <!-- Detalles de la reserva -->
         <div class="section reservation-details">
             <h3>Detalles de su Reserva</h3>
