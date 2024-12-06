@@ -304,7 +304,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && $reporteSeleccionado) {
     font-size: 16px;
     font-weight: bold;
     color: #333;
-    margin-bottom: 5px;
+    margin-top: 10px;
+    margin-bottom: 2px;
 }
 
 .formulario input,
