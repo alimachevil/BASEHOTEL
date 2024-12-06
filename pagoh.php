@@ -25,8 +25,7 @@ $check_out = $_SESSION['check_out'];
 $cuartos_seleccionados = $_SESSION['cuartos_seleccionados']; // Array con habitaciones seleccionadas
 $adultos = $_SESSION['adultos'];  // Adultos por habitación
 $ninos = $_SESSION['ninos'];    // Niños por habitación
-$total_costo_mesas = $_SESSION['total_costo_mesas'];
-
+$location = $_SESSION['location'];
 
 // Conexión a la base de datos
 $host = 'localhost';
@@ -83,7 +82,12 @@ foreach ($cuartos_seleccionados as $cuarto) {
 // Cálculo de días de estadía
 $dias_estadia = calcularDiasEstadia($check_in, $check_out);
 
+// por alguna razon no tomaba el id, por eso tenia que poner esto
+$id_reserva = null;                                              
+
 // Verifica si el formulario de cliente se envió
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validar y guardar los datos del cliente
     $nombre = $_POST['nombre'];
@@ -93,15 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $correo = $_POST['correo'];
     $celular = $_POST['celular'];
     $pais = $_POST['pais'];
-
-    // Calcular el total de la reserva de hotel
-    $total_pago = 0;
-    foreach ($habitaciones_info as $habitacion) {
-        $total_pago += $habitacion['precio_base'] * $dias_estadia;
-    }
-
-    // Sumar el costo de las mesas al total de la reserva
-    $total_pago += $total_costo_mesas;
+    $total_general = isset($_SESSION['total_general']) ? $_SESSION['total_general'] : 0;
 
     // Insertar datos del cliente en la tabla `clientes`
     $query_cliente = "
@@ -116,12 +112,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Insertar la reserva en la tabla `reservas`
     $fecha_reserva = date('Y-m-d H:i:s'); // Fecha actual
     $id_promocion = null; // Asumimos sin promociones
-    $id_hotel = 1; // Asumimos un hotel por defecto
+    $id_hotel = $location;
 
     // Insertar la reserva en la tabla `reservas` con el total de pago
     $query_reserva = "
         INSERT INTO reservas (fecha_reserva, fecha_checkin, fecha_checkout, total_pago, id_cliente, id_promocion, id_hotel)
-        VALUES ('$fecha_reserva', '$check_in', '$check_out', $total_pago, $id_cliente, " . ($id_promocion ? $id_promocion : 'NULL') . ", $id_hotel)
+        VALUES ('$fecha_reserva', '$check_in', '$check_out', $total_general, $id_cliente, " . ($id_promocion ? $id_promocion : 'NULL') . ", $id_hotel)
     ";
 
     if (!$conn->query($query_reserva)) {
@@ -194,11 +190,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     }    
 
-    // Guardar el ID de reserva en sesión y redirigir a la página de confirmación
+    // Guardar el ID de reserva en la sesión                                  <<<<<<<<<<<<AGREGUE
     $_SESSION['id_reserva'] = $id_reserva;
-    header('Location: confirmacion_pago.php');
+    // Recargar la página para mostrar el modal
+    header("Location: " . $_SERVER['PHP_SELF']);
     exit();
+                                                                          //  <<<<<<<<<<<<AGREGUE
 }
+
+// Obtener el ID de reserva desde la sesión (si existe)
+$id_reserva = isset($_SESSION['id_reserva']) ? $_SESSION['id_reserva'] : null;      //  <<<<<<<<<<<<AGREGUE
+
+
 ?>
 
 
@@ -514,7 +517,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php 
             // Verifica si la sesión tiene los datos necesarios
-            if (isset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['cuartos_seleccionados'], $_SESSION['adultos'], $_SESSION['ninos'], $habitaciones_info, $_SESSION['reserva_mesa'])): 
+            if (isset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['cuartos_seleccionados'], $_SESSION['adultos'], $_SESSION['ninos'], $habitaciones_info)): 
                 $total_general = 0; // Variable para el total general de la reserva
 
                 // Calcula los días de estadía
@@ -586,6 +589,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $id_mesa = $mesa['id_mesa']; // ID de la mesa
                             $fecha_reserva = $mesa['fecha_reserva']; // Fecha de la reserva
                             $tipo_reserva = $mesa['tipo_reserva']; // Tipo de reserva
+                            $precio_reservam = $mesa['precio_reservam']; // Costo de reserva
 
                             // Mostrar los detalles de la mesa
                             echo "<div style='border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;'>
@@ -594,10 +598,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <p style='margin: 0; font-size: 14px;'>ID de la mesa: <strong>$id_mesa</strong></p>
                                         <p style='margin: 0; font-size: 14px;'>Fecha de reserva: <strong>$fecha_reserva</strong></p>
                                         <p style='margin: 0; font-size: 14px;'>Tipo de reserva: <strong>$tipo_reserva</strong></p>
-                                        <p style='margin: 0; font-size: 14px;'>Total por mesas: <strong>S/ " . number_format($total_costo_mesas, 2) . "</strong></p>
+                                        <p style='margin: 0; font-size: 14px;'>Total por mesas: <strong>S/ " . number_format($precio_reservam, 2) . "</strong></p>
                                     </div>
                                 </div>";
-                                $total_general += $total_costo_mesas; // Sumar el costo de las mesas al total general
+                                $total_general += $precio_reservam; // Sumar el costo de las mesas al total general
                         else:
                             echo "<p>Faltan datos para la mesa " . ($index + 1) . ".</p>";
                         endif;
@@ -846,7 +850,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 
                     // Mostrar el precio de cada habitación
-                    echo "<p style='font-size: 14px; color: #555; text-align: center;'>Habitación " . ($index + 1) . " (Nro: $numero_cuarto) x <strong> $dias_estadia días = S/ " . number_format($precio_ajustado * $dias_estadia, 2) . "</strong></p>";
+                    echo "<p style='font-size: 14px; color: #555; text-align: center;'>Habitación " . ($index + 1) . " (Nro: $numero_cuarto) x <strong> $dias_estadia noches = S/ " . number_format($precio_ajustado * $dias_estadia, 2) . "</strong></p>";
 
                     // Sumar al total general
                     $subtotal = $precio_ajustado * $dias_estadia;
@@ -861,11 +865,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // echo "<h4 style='font-size: 18px; color: #333; text-align: center; margin-top: 20px;'>Mesas Reservadas</h4>";
                 foreach ($reserva_mesa as $index => $mesa) {
                     $tipo_mesa = $mesa['tipo_reserva'];
-                    //$costo_mesa = $mesa['costo_mesa'];
+                    $precio_reservam = $mesa['precio_reservam'];
 
-                    echo "<p style='font-size: 14px; color: #555; text-align: center;'>Mesa " . ($index + 1) . " (Tipo: $tipo_mesa) = <strong>S/ "  . number_format($total_costo_mesas, 2) ."</strong></p>";
+                    echo "<p style='font-size: 14px; color: #555; text-align: center;'>Mesa " . ($index + 1) . " (Tipo: $tipo_mesa) = <strong>S/ "  . number_format($precio_reservam, 2) ."</strong></p>";
 
-                    $total_general += $total_costo_mesas;
+                    $total_general += $precio_reservam;
                 }
             else:
                 echo "<p style='text-align: center; color: #888;'>No hay información disponible sobre las mesas reservadas.</p>";
@@ -873,13 +877,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Mostrar el total general
             echo "<p style='font-size: 18px; font-weight: bold; color: #333; text-align: center; margin-top: 20px;'><strong>Total a pagar:</strong> S/ " . number_format($total_general, 2) . "</p>";
+            $_SESSION['total_general'] = $total_general;
             ?>
             
-            <!-- Botón para pagar -->
+               
+                <!-- Botón para pagar -->
             <div style="text-align: center; margin-top: 20px;">
-                <button type="submit" form="formulario" class="btn btn-warning">Pagar</button>
+                <button type="submit" form="formulario" class="btn btn-warning" style="padding: 10px 20px; font-size: 16px; border-radius: 5px; background-color: #ffc107; border: none; cursor: pointer;">Pagar</button>
             </div>
         </div>
+           <!-- Modal de Confirmación -->
+           <div id="confirmacionModal" class="modal" tabindex="-1" style="display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0, 0, 0, 0.7);">
+            <div style="margin: 10% auto; padding: 30px; width: 40%; background: linear-gradient(145deg, #ffffff, #f3f3f3); border-radius: 15px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); text-align: center;">
+        
+                <!-- Mensaje de Confirmación -->
+                <h3 style="font-size: 24px; color: #333; font-weight: bold; margin-bottom: 20px;">¡Reserva Confirmada!</h3>
+            
+                <!-- Ícono de check -->
+        <div style="width: 80px; height: 80px; margin: 0 auto 20px; background-color: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" width="50px" height="50px">
+                        <path d="M9.00002 16.2L4.80002 12L3.40002 13.4L9.00002 19L21 7.00001L19.6 5.60001L9.00002 16.2Z"/>
+                    </svg>
+                </div>
+                <!-- Mensaje de Confirmación -->
+                <p style="font-size: 18px; color: #666; margin-bottom: 15px;">Tu reserva ha sido registrada exitosamente.</p>
+                <p style="font-size: 20px; font-weight: bold; color: #333; margin-bottom: 25px;">ID de la Reserva: <span id="idReservaModal" style="color: #007bff;"><?php echo $id_reserva; ?></span></p>
+                
+<!-- Opciones -->
+<h4 style="color: #444; font-size: 18px; font-weight: bold; margin-bottom: 15px;">¿Desea registrar a los acompañantes?</h4>
+
+<div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+    <button onclick="window.location.href='ver_factura.php';"  
+        style="padding: 12px 25px; font-size: 16px; background-color: #D69C4F; color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;">
+        Descargar Factura
+    </button>
+
+    <button onclick="location.href='index.php';" 
+        style="padding: 12px 25px; font-size: 16px; background-color: #6c757d; color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;">
+        Regresar a Inicio
+    </button>
+</div>
+
+
+
+<!-- Modal de Confirmación (si se ha generado una reserva) -->
+<div id="confirmacionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
+    <div style="background: #fff; padding: 20px; border-radius: 10px; width: 300px; text-align: center;">
+        <h4>¡Reserva confirmada!</h4>
+        <p>Su reserva se ha realizado exitosamente.</p>
+        <button id="cerrarModal" style="padding: 10px 20px; background-color: #D69C4F; color: white; border: none; border-radius: 8px;">Cerrar</button>
+    </div>
+</div>
+
+<script>
+    // Obtener elementos
+    const confirmacionModal = document.getElementById('confirmacionModal');
+    const cerrarModal = document.getElementById('cerrarModal');
+    
+    // Mostrar el modal si existe un ID de reserva
+    <?php if (isset($id_reserva) && $id_reserva): ?>
+        document.getElementById('confirmacionModal').style.display = 'flex';
+    <?php endif; ?>
+    
+    // Cerrar modal al hacer clic en el botón "Cerrar"
+    cerrarModal.addEventListener('click', function () {
+        confirmacionModal.style.display = 'none';
+    });
+</script>
+
+
+
+
+
+
+
     </div>
 </body>
 </html> 
