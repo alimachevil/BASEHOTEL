@@ -33,29 +33,45 @@ if (!isset($_SESSION['id_reserva'])) {
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
-            $_SESSION['id_reserva'] = $codigo_reserva;
-
-            // Cargar habitaciones asociadas a la reserva
-            $sql = "
-                SELECT c.id_cuarto, c.numero, c.capacidad_adultos, c.capacidad_niños
-                FROM cuartos c
-                INNER JOIN reservaporcuartos r ON c.id_cuarto = r.id_cuarto
-                WHERE r.id_reserva = ?
-            ";
-            $stmt = $conn->prepare($sql);
+            // Verificar si ya hay acompañantes registrados para esta reserva
+            $stmt = $conn->prepare("
+                SELECT COUNT(*) AS total_acompañantes 
+                FROM acompañantes 
+                WHERE id_reserva = ?
+            ");
             $stmt->bind_param("i", $codigo_reserva);
             $stmt->execute();
             $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
 
-            if ($result->num_rows > 0) {
-                $_SESSION['habitaciones'] = $result->fetch_all(MYSQLI_ASSOC);
-                $_SESSION['habitacion_actual'] = 0;
+            if ($row['total_acompañantes'] > 0) {
+                // Mensaje de acompañantes ya registrados
+                $error = "Acompañantes ya registrados para esta reserva.";
             } else {
-                $error = "No se encontraron habitaciones para esta reserva.";
-            }
+                $_SESSION['id_reserva'] = $codigo_reserva;
 
-            header('Location: ' . $_SERVER['PHP_SELF']);
-            exit();
+                // Cargar habitaciones asociadas a la reserva
+                $sql = "
+                    SELECT c.id_cuarto, c.numero, c.capacidad_adultos, c.capacidad_niños
+                    FROM cuartos c
+                    INNER JOIN reservaporcuartos r ON c.id_cuarto = r.id_cuarto
+                    WHERE r.id_reserva = ?
+                ";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $codigo_reserva);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                if ($result->num_rows > 0) {
+                    $_SESSION['habitaciones'] = $result->fetch_all(MYSQLI_ASSOC);
+                    $_SESSION['habitacion_actual'] = 0;
+                } else {
+                    $error = "No se encontraron habitaciones para esta reserva.";
+                }
+
+                header('Location: ' . $_SERVER['PHP_SELF']);
+                exit();
+            }
         } else {
             $error = "El código de reserva no es válido.";
         }

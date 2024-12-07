@@ -205,7 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background-color: #f5f5f5;
         }
         header {
-            background-color: #000;
+            background-color: #212529;
             display: flex;
             justify-content: center;
             align-items: center;

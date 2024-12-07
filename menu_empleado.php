@@ -192,14 +192,14 @@ session_start();
                     <a href="pedido_restaurante_bar.php#habitacion"><i class="fas fa-bed"></i>Habitación</a>
                 </div>
             </form>
-            <form action="menu_reportes.php" method="GET">
+            <form action="reportes.php" method="GET">
                 <button type="submit" id="reportesBtn"><i class="fas fa-file-alt"></i>Reportes</button>
                 <div class="submenu" id="submenuReportes">
-                    <a href="listado_huespedes.php"><i class="fas fa-users"></i>Listado de Huéspedes</a>
-                    <a href="ranking_cuartos.php"><i class="fas fa-bed"></i>Ranking de Cuartos</a>
-                    <a href="reporte_monto_restaurante.php"><i class="fas fa-utensils"></i>Reporte Monto Restaurante</a>
-                    <a href="ranking_productos_restaurante.php"><i class="fas fa-cocktail"></i>Ranking Productos Restaurante</a>
-                    <a href="ranking_bebidas_bar.php"><i class="fas fa-beer"></i>Ranking Bebidas Bar</a>
+                    <a href="reportes.php?reporte=listado_huespedes"><i class="fas fa-users"></i>Listado de Huéspedes</a>
+                    <a href="reportes.php?reporte=ranking_habitaciones"><i class="fas fa-bed"></i>Ranking de Cuartos</a>
+                    <a href="reportes.php?reporte=reporte_monto_restaurante"><i class="fas fa-utensils"></i>Reporte Monto Restaurante</a>
+                    <a href="reportes.php?reporte=ranking_productos_restaurante"><i class="fas fa-cocktail"></i>Ranking Productos Restaurante</a>
+                    <a href="reportes.php?reporte=ranking_bebidas_bar"><i class="fas fa-beer"></i>Ranking Bebidas Bar</a>
                 </div>
             </form>
         </div>
