@@ -240,6 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 8px 16px 8px 16px;
             margin: 0.8px;
             cursor: pointer;
+            border-radius: 0px;
         }
         .btn-warning:hover {
             background-color: #c88942;
