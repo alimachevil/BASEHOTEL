@@ -160,6 +160,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight: bold;
             margin-bottom: 20px;
         }
+        .btn-warning {
+            background-color: #D69C4F;
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 0;
+        }
         .btn-warning:hover {
             background-color: #c88942;
         }
@@ -260,7 +269,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <a href="#" class="text-decoration-none" style="color: #D69C4F; font-weight: bold;" id="add-habitacion">+ Añadir una habitación</a>
                 </div>
                 <div class="d-grid">
-                    <button type="submit" class="btn btn-warning" style="background-color: #D69C4F; color: white; font-weight: bold;">
+                    <button type="submit" class="btn btn-warning">
                         ACTUALIZAR HUÉSPEDES Y HABITACIONES
                     </button>
                 </div>

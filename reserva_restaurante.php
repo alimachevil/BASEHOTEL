@@ -348,7 +348,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reservar_mesa'])) {
         outline: none;
         border-bottom: 2px solid #D69C4F; /* Color dorado al enfocar */
     }
-
+    .btn-warning1 {
+        background-color: #D69C4F;
+        color: white;
+        font-weight: bold;
+        border: none;
+        padding: 6px 12px;
+        cursor: pointer;
+        border-radius: 0px;
+    }
     .btn-warning1:hover {
         background-color: #c88942;
     }
@@ -432,9 +440,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reservar_mesa'])) {
                         <div class="col-4 text-start">
                             <label for="tipo_reserva" class="form-label">Horario:</label>
                             <select class="forms1" id="tipo_reserva" name="tipo_reserva" required>
-                                <option value="desayuno">Desayuno</option>
-                                <option value="almuerzo">Almuerzo</option>
-                                <option value="cena">Cena</option>
+                                <option value="Desayuno">Desayuno</option>
+                                <option value="Almuerzo">Almuerzo</option>
+                                <option value="Cena">Cena</option>
                             </select>
                         </div>
                         <div class="col-4 text-start">
@@ -442,8 +450,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['reservar_mesa'])) {
                         </div>
                     </div>
                 </div>
-                <button type="submit" name="consultar_mesas" class="btn btn-warning1" style="background-color: #D69C4F; color: white; font-weight: bold;">Consultar Disponibilidad</button>
-                <button type="button" class="btn btn-warning1" onclick="window.location.href='pagoh.php'" style="background-color: #D69C4F; color: white; font-weight: bold;">Confirmar Reserva</button>            
+                <button type="submit" name="consultar_mesas" class="btn btn-warning1" >Consultar Disponibilidad</button>
+                <button type="button" class="btn btn-warning1" onclick="window.location.href='pagoh.php'" >Confirmar Reserva</button>            
                 
             </form>
         </div>

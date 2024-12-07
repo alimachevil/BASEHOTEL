@@ -366,6 +366,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border: none;
             padding: 10px 20px;
             cursor: pointer;
+            border-radius: 0;
             margin-top: 10px;
         }
 
@@ -428,13 +429,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transform: scale(1);  /* Asegura que el checkbox no se agrande */
         }
 
-        .payment-info {
-            text-align: center;
-        }
-        .payment-info img {
-            width: 50px;
-            margin: 5px;
-        }
         .total {
             font-size: 16px;
             font-weight: bold;
@@ -805,73 +799,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
         <!-- Información de pago con resumen de reserva -->
-        <div class="section payment-info" style="font-family: Arial, sans-serif; padding: 15px; background-color: #f9f9f9; border-radius: 8px;">
-            <h3 style="text-align: center; font-size: 22px; color: #333;">Resumen de la Reserva</h3>
+        <div class="section payment-info">
+            <h3>Resumen de la Reserva</h3>
 
-            <?php 
-            $total_general = 0; // Inicializar el total general
+            <?php
+                $total_general = 0; // Inicializar el total general
 
-            // Mostrar el resumen de habitaciones si existen
-            if (!empty($cuartos_seleccionados)): 
-                $total_habitaciones = count($cuartos_seleccionados);
-                
-                echo "<p style='font-size: 16px; color: #555; text-align: center;'><strong>Total de habitaciones:</strong> $total_habitaciones</p>";
-
-                foreach ($cuartos_seleccionados as $index => $cuarto): 
-                    $numero_cuarto = '';
-                    $precio_base = 0;
-                
-                    // Obtener el precio de la habitación y el número
-                    foreach ($habitaciones_info as $habitacion) {
-                        if ($habitacion['id_cuarto'] == $cuarto['id_cuarto']) {
-                            $numero_cuarto = $habitacion['numero'];
-                            $precio_base = $habitacion['precio_base'];
-                            break;
+                // Mostrar el resumen de habitaciones si existen
+                if (!empty($cuartos_seleccionados)): 
+                    $total_habitaciones = count($cuartos_seleccionados);
+                    
+                    echo "<p style='font-size: 16px; color: #212529; text-align: center;'><strong>Total de habitaciones:</strong> $total_habitaciones</p>";
+                    
+                    foreach ($cuartos_seleccionados as $index => $cuarto): 
+                        $numero_cuarto = '';
+                        $precio_base = 0;
+                    
+                        // Obtener el precio de la habitación y el número
+                        foreach ($habitaciones_info as $habitacion) {
+                            if ($habitacion['id_cuarto'] == $cuarto['id_cuarto']) {
+                                $numero_cuarto = $habitacion['numero'];
+                                $precio_base = $habitacion['precio_base'];
+                                break;
+                            }
                         }
+                    
+                        // Calcular precio ajustado
+                        $tipo_pago = $cuarto['tipo_pago'];
+                        if ($tipo_pago === 'web') {
+                            $precio_ajustado = $precio_base * 0.7;
+                        } elseif ($tipo_pago === 'blackdays') {
+                            $precio_ajustado = $precio_base * 0.65;
+                        } else {
+                            $precio_ajustado = $precio_base;
+                        }
+                    
+                        // Mostrar el precio de cada habitación
+                        echo "<p style='font-size: 14px; color: #212529; text-align: left; display: flex; justify-content: space-between;'>Habitación " . ($index + 1) . " (Nro: $numero_cuarto) x $dias_estadia noches  <strong> S/ " . number_format($precio_ajustado * $dias_estadia, 2) . "</strong></p>";
+
+                        // Sumar al total general
+                        $subtotal = $precio_ajustado * $dias_estadia;
+                        $total_general += $subtotal;
+                    endforeach;
+                    echo "<div style='border-bottom: 1px solid #ddd; margin-bottom: 15px;'></div>";
+                else:
+                endif;
+
+                // Mostrar el resumen de mesas si existen reservas
+                if (!empty($reserva_mesa)): 
+                $total_mesas = count($reserva_mesa);
+                echo "<p style='font-size: 16px; color: #212529; text-align: center;'><strong>Mesas Reservadas: </strong> $total_mesas</p>";
+                    foreach ($reserva_mesa as $index => $mesa) {
+                        $tipo_mesa = $mesa['tipo_reserva'];
+                        $precio_reservam = $mesa['precio_reservam'];
+
+                        echo "<p style='font-size: 14px; color: #212529; text-align: left; display: flex; justify-content: space-between;'>Mesa " . ($index + 1) . " (Tipo: $tipo_mesa) <strong>S/ "  . number_format($precio_reservam, 2) ."</strong></p>";
+
+                        $total_general += $precio_reservam;
                     }
-                
-                    // Calcular precio ajustado
-                    $tipo_pago = $cuarto['tipo_pago'];
-                    if ($tipo_pago === 'web') {
-                        $precio_ajustado = $precio_base * 0.7;
-                    } elseif ($tipo_pago === 'blackdays') {
-                        $precio_ajustado = $precio_base * 0.65;
-                    } else {
-                        $precio_ajustado = $precio_base;
-                    }
-                
-                    // Mostrar el precio de cada habitación
-                    echo "<p style='font-size: 14px; color: #555; text-align: center;'>Habitación " . ($index + 1) . " (Nro: $numero_cuarto) x <strong> $dias_estadia noches = S/ " . number_format($precio_ajustado * $dias_estadia, 2) . "</strong></p>";
-
-                    // Sumar al total general
-                    $subtotal = $precio_ajustado * $dias_estadia;
-                    $total_general += $subtotal;
-                endforeach;
-            else:
-            endif;
-
-            // Mostrar el resumen de mesas si existen reservas
-            if (!empty($reserva_mesa)): 
-            // echo "<h4 style='font-size: 18px; color: #333; text-align: center; margin-top: 20px;'>Mesas Reservadas</h4>";
-                foreach ($reserva_mesa as $index => $mesa) {
-                    $tipo_mesa = $mesa['tipo_reserva'];
-                    $precio_reservam = $mesa['precio_reservam'];
-
-                    echo "<p style='font-size: 14px; color: #555; text-align: center;'>Mesa " . ($index + 1) . " (Tipo: $tipo_mesa) = <strong>S/ "  . number_format($precio_reservam, 2) ."</strong></p>";
-
-                    $total_general += $precio_reservam;
-                }
-            else:
-            endif;
-
-            // Mostrar el total general
-            echo "<p style='font-size: 18px; font-weight: bold; color: #333; text-align: center; margin-top: 20px;'><strong>Total a pagar:</strong> S/ " . number_format($total_general, 2) . "</p>";
-            $_SESSION['total_general'] = $total_general;
+                    echo "<div style='border-bottom: 1px solid #ddd; margin-bottom: 15px'></div>";
+                else:
+                endif;
+                echo "<p style='font-size: 14px; color: #212529; text-align: left; display: flex; justify-content: space-between;'>Subtotal de reserva <strong>S/ "  . number_format($total_general, 2) ."</strong></p>";
+                echo "<div style='border-bottom: 1px solid #ddd; margin-bottom: 15px'></div>";
+                $IGV = $total_general * 0.18;
+                echo "<p style='font-size: 14px; color: #212529; text-align: left; display: flex; justify-content: space-between;'>Cargo por IGV (18%) <strong>S/ "  . number_format($IGV, 2) ."</strong></p>";
+                echo "<div style='border-bottom: 1px solid #ddd; margin-bottom: 15px'></div>";
+                $total_general += $IGV;
+                echo "<p style='font-size: 16px; font-weight: bold; color: #212529; text-align: left; display: flex; justify-content: space-between;'>Total a pagar: <strong style='font-size: 20px;'>S/ " . number_format($total_general, 2) . "</strong></p>";
+                $_SESSION['total_general'] = $total_general;
             ?>
             
             <!-- Botón para pagar -->
             <div style="text-align: center; margin-top: 20px;">
-                <button type="submit" form="formulario" class="btn btn-warning">Pagar</button>
+                <button type="submit" form="formulario" class="btn btn-warning">RESERVE AHORA </button>
             </div>
         </div>
 
@@ -894,15 +895,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </span></p>
             
                 <!-- Opciones -->
-                <h4 style="color: #444; font-size: 18px; font-weight: bold; margin-bottom: 15px;">¿Desea ver tu factura electrónica?</h4>
+                <h4 style="color: #444; font-size: 18px; font-weight: bold; margin-bottom: 15px;">¿Deseas ver tu factura electrónica?</h4>
                 <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-                    <button onclick="window.location.href='ver_factura.php';"  
-                        style="padding: 12px 25px; font-size: 16px; background-color: #D69C4F; color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;">
-                        Descargar Factura
-                    </button>
-                    <button onclick="location.href='index.php';" 
-                        style="padding: 12px 25px; font-size: 16px; background-color: #6c757d; color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;">
-                        Regresar a Inicio
+                    <button onclick="window.location.href='factura.php';"
+                        style="padding: 12px 25px; font-size: 16px; background-color: #D69C4F; color: #fff; border: none; border-radius: 0px; cursor: pointer; transition: all 0.3s ease;">
+                        Visualizar Factura
                     </button>
                 </div>
             </div>
