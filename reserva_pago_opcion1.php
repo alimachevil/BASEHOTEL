@@ -52,9 +52,10 @@ if (!isset($_SESSION['id_reserva'])) {
 
                 // Cargar habitaciones asociadas a la reserva
                 $sql = "
-                    SELECT c.id_cuarto, c.numero, c.capacidad_adultos, c.capacidad_niños
+                    SELECT c.id_cuarto, c.numero, t.capacidad_adultos, t.capacidad_niños
                     FROM cuartos c
                     INNER JOIN reservaporcuartos r ON c.id_cuarto = r.id_cuarto
+                    INNER JOIN tipo_cuarto t ON t.id_tipo = c.id_tipo
                     WHERE r.id_reserva = ?
                 ";
                 $stmt = $conn->prepare($sql);
@@ -282,6 +283,7 @@ if (!isset($_SESSION['id_reserva'])) {
             padding: 30px;
             display: flex;
             flex-direction: column;
+            position: fixed;
             justify-content: center;
             align-items: center;
             background-color: #fff;
@@ -952,7 +954,7 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
     border: 1px solid #D69C4F;
     border-radius: 5px;
     background-color: #FFFFFF;
-    color: #FFFFFF;
+    color: #000;
     font-size: 14px;
 }
 

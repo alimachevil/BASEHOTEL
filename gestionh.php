@@ -100,11 +100,11 @@ for ($i = 0; $i < $habitaciones; $i++) {
     }
 
     $query = "
-        SELECT c.*, t.nombre AS tipo_cuarto, c.descripcion
+        SELECT c.*, t.nombre AS tipo_cuarto, c.descripcion, t.capacidad_adultos, t.capacidad_niños
         FROM cuartos c
         JOIN tipo_cuarto t ON c.id_tipo = t.id_tipo
-        WHERE c.capacidad_adultos >= $capacidad_adultos
-        AND c.capacidad_niños >= $capacidad_ninos
+        WHERE t.capacidad_adultos >= $capacidad_adultos
+        AND t.capacidad_niños >= $capacidad_ninos
         $not_in_clause
         AND c.id_cuarto NOT IN (
             SELECT rc.id_cuarto
@@ -552,7 +552,7 @@ for ($i = 0; $i < $habitaciones; $i++) {
                     // Realizamos una consulta para obtener los detalles de la habitación según el id_cuarto
                     $id_cuarto = (int) $seleccion['id_cuarto']; // Aseguramos que id_cuarto es un número entero
                     $query = "
-                        SELECT h.id_cuarto, h.numero, h.piso, h.capacidad_adultos, h.capacidad_niños, h.descripcion, h.precio_base, t.nombre AS tipo_cuarto
+                        SELECT h.id_cuarto, h.numero, h.piso, t.capacidad_adultos, t.capacidad_niños, h.descripcion, h.precio_base, t.nombre AS tipo_cuarto
                         FROM cuartos h
                         JOIN tipo_cuarto t ON h.id_tipo = t.id_tipo
                         WHERE h.id_cuarto = $id_cuarto
