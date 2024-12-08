@@ -81,6 +81,8 @@ foreach ($cuartos_seleccionados as $cuarto) {
 
 // Cálculo de días de estadía
 $dias_estadia = calcularDiasEstadia($check_in, $check_out);
+$pago_hotel = 0;
+$pago_web = 0;
 
 // Verifica si el formulario de cliente se envió
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -123,9 +125,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Insertar la relación entre la reserva y las habitaciones seleccionadas
     foreach ($cuartos_seleccionados as $cuarto) {
         $id_cuarto = intval($cuarto['id_cuarto']);
+        $tipo_pago = $cuarto['tipo_pago'];
+        if ($tipo_pago === 'web') {
+            $tipo_reservacuarto = 3;
+        } elseif ($tipo_pago === 'blackdays') {
+            $tipo_reservacuarto = 2;
+        } else {
+            $tipo_reservacuarto = 1;
+        }
         $query_reservaporcuartos = "
-            INSERT INTO reservaporcuartos (id_reserva, id_cuarto)
-            VALUES ($id_reserva, $id_cuarto)
+            INSERT INTO reservaporcuartos (id_reserva, id_cuarto, id_tipo)
+            VALUES ($id_reserva, $id_cuarto, $tipo_reservacuarto)
         ";
         if (!$conn->query($query_reservaporcuartos)) {
             die("Error al guardar la relación de reserva y cuartos: " . $conn->error);
@@ -527,17 +537,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             break;
                         }
                     }
-
                     // Calcular precio ajustado según el tipo de pago
                     $tipo_pago = $cuarto['tipo_pago'];
                     if ($tipo_pago === 'web') {
                         $precio_ajustado = $precio_base * 0.7;
+                        $pago_web = $pago_web + $precio_ajustado * $dias_estadia;
                         $tipo_pago_desc = '<span style="color: #007bff;">Pagar por web</span>';
                     } elseif ($tipo_pago === 'blackdays') {
                         $precio_ajustado = $precio_base * 0.65;
+                        $pago_web = $pago_web + ($precio_ajustado * $dias_estadia);
                         $tipo_pago_desc = '<span style="color: #28a745;">Black Days</span>';
                     } else {
                         $precio_ajustado = $precio_base;
+                        $pago_hotel += $pago_hotel + ($precio_ajustado * $dias_estadia);
                         $tipo_pago_desc = '<span style="color: #6c757d;">Pagar en hotel</span>';
                     }
 
@@ -586,6 +598,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <p style='margin: 0; font-size: 14px;'>Total por mesas: <strong>S/ " . number_format($precio_reservam, 2) . "</strong></p>
                                     </div>
                                 </div>";
+                                $pago_web = $pago_web + $precio_reservam;
                                 $total_general += $precio_reservam; // Sumar el costo de las mesas al total general
                         else:
                             echo "<p>Faltan datos para la mesa " . ($index + 1) . ".</p>";
@@ -867,6 +880,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo "<div style='border-bottom: 1px solid #ddd; margin-bottom: 15px'></div>";
                 $total_general += $IGV;
                 echo "<p style='font-size: 16px; font-weight: bold; color: #212529; text-align: left; display: flex; justify-content: space-between;'>Total a pagar: <strong style='font-size: 20px;'>S/ " . number_format($total_general, 2) . "</strong></p>";
+                echo "<p style='font-size: 14px; color: #212529; text-align: left; display: flex; justify-content: space-between;'>Total a pagar en hotel <strong>S/ "  . number_format($pago_hotel * 1.18, 2) ."</strong></p>";
+                echo "<p style='font-size: 14px; color: #212529; text-align: left; display: flex; justify-content: space-between;'>Total a pagar por web <strong>S/ "  . number_format($pago_web * 1.18, 2) ."</strong></p>";
                 $_SESSION['total_general'] = $total_general;
             ?>
             

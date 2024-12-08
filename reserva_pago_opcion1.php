@@ -578,7 +578,11 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
             background-color: #FFFFFF;
         }
         .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 250px;
+            height: 100%;
             background-color: #333;
             color: white;
             padding-top: 20px;
@@ -586,7 +590,7 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            height: 100%;
+            z-index: 1000; /* Asegúrate de que el sidebar esté encima del contenido */
         }
         .sidebar img {
             width: 80%;
@@ -680,13 +684,13 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
 
         /* Estilos para la sección de contenido a la derecha */
         .content {
-            flex-grow: 1;
+            margin-left: 250px; /* Asegura que el contenido no se superponga con el sidebar */
             padding: 30px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background-color: #FFFFFF;
+            background-color: #fff;
         }
         
         /*NUEVO ESTILO DE FORMULARIO*/

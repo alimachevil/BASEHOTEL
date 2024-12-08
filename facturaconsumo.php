@@ -16,14 +16,14 @@ if ($conn->connect_error) {
 $id_cuenta = $_SESSION['id_cuenta'];
 
 // Obtener datos de la cuenta y la reserva relacionada
-$query = "SELECT cc.id_reserva, cc.monto, r.fecha_reserva, r.fecha_checkin, r.fecha_checkout, r.id_hotel 
+$query = "SELECT cc.id_reserva, cc.monto, r.fecha_reserva, r.fecha_checkin, r.fecha_checkout, r.id_hotel, r.total_pago
           FROM cuenta_cobranza cc 
           JOIN reservas r ON cc.id_reserva = r.id_reserva 
           WHERE cc.id_cuenta = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param('i', $id_cuenta);
 $stmt->execute();
-$stmt->bind_result($id_reserva, $monto, $fecha_reserva, $fecha_checkin, $fecha_checkout, $id_hotel);
+$stmt->bind_result($id_reserva, $monto, $fecha_reserva, $fecha_checkin, $fecha_checkout, $id_hotel, $total_pago);
 $stmt->fetch();
 $stmt->close();
 
@@ -39,17 +39,17 @@ $stmt->close();
 
 // Obtener consumos asociados (bar, habitación, restaurante)
 $query_consumos = "
-    SELECT 'BAR' AS origen, cb.id_bebida AS id, b.nombre_bebida AS descripcion, cb.cantidad, b.precio, cb.subtotal 
+    SELECT 'BAR' AS origen, cb.id_bebida AS id, b.nombre_bebida AS descripcion, cb.cantidad, b.precio, cb.subtotal, cb.fecha_consumo
     FROM consumo_bar cb
     JOIN bar b ON cb.id_bebida = b.id_bebida
     WHERE cb.id_cuenta = ?
     UNION ALL
-    SELECT 'HABITACION', ch.id_servicio, sh.nombre_producto, ch.cantidad, sh.precio, ch.subtotal 
+    SELECT 'HABITACION', ch.id_servicio, sh.nombre_producto, ch.cantidad, sh.precio, ch.subtotal, ch.fecha_consumo
     FROM consumo_habitacion ch
     JOIN servicio_habitacion sh ON ch.id_servicio = sh.id_servicio
     WHERE ch.id_cuenta = ?
     UNION ALL
-    SELECT 'RESTAURANTE', cr.id_plato, r.nombre_plato, cr.cantidad, r.precio, cr.subtotal 
+    SELECT 'RESTAURANTE', cr.id_plato, r.nombre_plato, cr.cantidad, r.precio, cr.subtotal, cr.fecha_consumo
     FROM consumo_restaurante cr
     JOIN restaurante r ON cr.id_plato = r.id_plato
     WHERE cr.id_cuenta = ?";
@@ -58,9 +58,51 @@ $stmt->bind_param('iii', $id_cuenta, $id_cuenta, $id_cuenta);
 $stmt->execute();
 $result_consumos = $stmt->get_result();
 
+function calcularDiasEstadia($check_in, $check_out) {
+    $fecha1 = new DateTime($check_in);
+    $fecha2 = new DateTime($check_out);
+    return $fecha2->diff($fecha1)->days;
+}
+
+$dias_estadia = calcularDiasEstadia($fecha_checkin, $fecha_checkout);
+
 // Calcular impuestos y totales
-$IGV = $monto * 0.18;
-$sub_total = $monto - $IGV;
+$sub_total = 0;
+$IGV = 0;
+
+$query_cliente = "SELECT rc.id_tipo, c.id_cuarto, c.precio_base, t.nombre 
+                  FROM reservaporcuartos rc
+                  JOIN cuartos c ON c.id_cuarto = rc.id_cuarto
+                  JOIN tipo_cuarto t ON t.id_tipo = c.id_tipo
+                  WHERE rc.id_reserva = ?";
+
+if ($stmt_cliente = $conn->prepare($query_cliente)) {
+    $stmt_cliente->bind_param("i", $id_reserva);
+    $stmt_cliente->execute();
+    $stmt_cliente->bind_result($id_tipo, $id_cuarto, $precio_base, $nombre);
+    $resultados = [];
+    while ($stmt_cliente->fetch()) {
+        $resultados[] = [
+            'id_tipo' => $id_tipo,
+            'id_cuarto' => $id_cuarto,
+            'precio_base' => $precio_base,
+            'nombre' => $nombre
+        ];
+    }
+    $stmt_cliente->close();
+}
+
+$query_cliente = "SELECT cl.nombre, cl.apellido 
+                     FROM reservas r
+                     JOIN clientes cl ON r.id_cliente = cl.id_cliente
+                     WHERE r.id_reserva = ?";
+    if ($stmt_cliente = $conn->prepare($query_cliente)) {
+        $stmt_cliente->bind_param("i", $id_reserva);
+        $stmt_cliente->execute();
+        $stmt_cliente->bind_result($nombre_huesped, $apellido_huesped);
+        $stmt_cliente->fetch();
+        $stmt_cliente->close();
+    }
 
 function convertirNumeroEnLetras($numero) {
     $numero = number_format($numero, 2, ".", ""); // Formatea el número a 2 decimales
@@ -528,15 +570,31 @@ function convertirNumeroEnLetras($numero) {
                     </tr>
                 </thead>
                 <tbody>
+                    <?php foreach ($resultados as $cuarto) {
+                            if ($cuarto['id_tipo'] == 1) {
+                        ?>
+                        <tr>
+                            <td><?= $dias_estadia ?></td>
+                            <td>UNIDAD</td>
+                            <td>H - <?= $cuarto['id_cuarto'] ?></td>
+                            <td>HOSPEDAJE HAB. <?= $cuarto['nombre'] ?> - HUESPED: <?= $nombre_huesped . ' ' . $apellido_huesped ?> - DEL: <?= date('d-m-Y', strtotime($fecha_checkin)) ?> HASTA: <?= date('d-m-Y', strtotime($fecha_checkout)) ?></td>
+                            <td><?= number_format($cuarto['precio_base'], 2) ?></td>
+                            <td> </td>
+                            <td><?= number_format($cuarto['precio_base']*$dias_estadia, 2) ?></td>
+                            <?php $sub_total +=  $cuarto['precio_base']*$dias_estadia?>
+                        </tr>
+                    <?php } } $IGV = $sub_total * 0.18;?>
+
                     <?php while ($row = $result_consumos->fetch_assoc()): ?>
                         <tr>
-                            <td style="display: flex; justify-content: center; align-items: center; height: 100%;"><?= $row['cantidad'] ?></td>
+                            <td><?= $row['cantidad'] ?></td>
                             <td >UNIDAD</td>
-                            <td style="display: flex; justify-content: center; align-items: center; height: 100%;"><?= htmlspecialchars($row['id']) ?></td>
-                            <td ><?= htmlspecialchars($row['descripcion']) ?></td>
-                            <td style="display: flex; justify-content: center; align-items: center; height: 100%;"><?= number_format($row['precio'], 2) ?></td>
-                            <td></td>
-                            <td style="display: flex; justify-content: center; align-items: center; height: 100%;"><?= number_format($row['subtotal'], 2) ?></td>
+                            <td ><?= htmlspecialchars($row['id']) ?></td>
+                            <td ><?= htmlspecialchars($row['descripcion']) ?> - HUESPED: <?= $nombre_huesped . ' ' . $apellido_huesped ?> - DÍA: <?= htmlspecialchars($row['fecha_consumo']) ?></td>
+                            <td ><?= number_format($row['precio'], 2) ?></td>
+                            <td ></td>
+                            <td ><?= number_format($row['subtotal'], 2) ?></td>
+                            <?php $sub_total +=  $row['subtotal']?>
                         </tr>
                     <?php endwhile; ?>
                 </tbody>
@@ -544,7 +602,7 @@ function convertirNumeroEnLetras($numero) {
             
             <div class="total-label" style="text-align: left;">
                 
-                1-00000<?= trim($id_cuenta) ?> - <?= convertirNumeroEnLetras($monto) ?>
+                1-00000<?= trim($id_cuenta) ?> - <?= convertirNumeroEnLetras($sub_total + $IGV) ?>
             </div>
 
             <div class="total-section">
@@ -576,7 +634,7 @@ function convertirNumeroEnLetras($numero) {
                         <p style="width: 100%">0.00</p>
                         <p style="width: 100%">0.00</p>
                         <p style="width: 100%">S/ <?= number_format($IGV, 2) ?></p>
-                        <p style="font-weight: bold; padding-right: 5px; padding-top: 4px;background-color: #0046ad; color: white; width: 100%" ><?= number_format($monto, 2) ?></p>
+                        <p style="font-weight: bold; padding-right: 5px; padding-top: 4px;background-color: #0046ad; color: white; width: 100%" ><?= number_format(($sub_total + $IGV), 2) ?></p>
                     </div>
                 </div>
             </div>

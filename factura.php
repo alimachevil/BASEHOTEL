@@ -55,8 +55,8 @@
         $stmt_hotel->fetch();
         $stmt_hotel->close();
     }
-    $sub_total = $total_pago / 1.18;
-    $IGV = $sub_total * 0.18;
+    $sub_total = 0;
+    $IGV = 0;
 
     function convertirNumeroEnLetras($numero) {
         $numero = number_format($numero, 2, ".", ""); // Formatea el número a 2 decimales
@@ -515,20 +515,21 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($cuartos_seleccionados as $cuarto) { 
-                        $id_cuarto = $cuarto['id_cuarto'];
-                        $query = "SELECT c.precio_base, t.nombre AS tipo_cuarto 
-                                FROM cuartos c
-                                JOIN tipo_cuarto t ON c.id_tipo = t.id_tipo
-                                WHERE c.id_cuarto = ?";
-                        if ($stmt = $conn->prepare($query)) {
-                            $stmt->bind_param("i", $id_cuarto);
-                            $stmt->execute();
-                            $stmt->bind_result($precio_base, $tipo_cuarto);
-                            $stmt->fetch();
-                            $stmt->close();
-                        }
-                        $descuento = (1 - ($cuarto['precio']/$precio_base)) * $precio_base;
+                    <?php foreach ($cuartos_seleccionados as $cuarto) {
+                        if ($cuarto['tipo_pago'] != 'hotel') {
+                            $id_cuarto = $cuarto['id_cuarto'];
+                            $query = "SELECT c.precio_base, t.nombre AS tipo_cuarto 
+                                    FROM cuartos c
+                                    JOIN tipo_cuarto t ON c.id_tipo = t.id_tipo
+                                    WHERE c.id_cuarto = ?";
+                            if ($stmt = $conn->prepare($query)) {
+                                $stmt->bind_param("i", $id_cuarto);
+                                $stmt->execute();
+                                $stmt->bind_result($precio_base, $tipo_cuarto);
+                                $stmt->fetch();
+                                $stmt->close();
+                            }
+                            $descuento = (1 - ($cuarto['precio']/$precio_base)) * 100;
                     ?>
                     <tr>
                         <td><?= $dias_estadia ?></td>
@@ -538,8 +539,9 @@
                         <td><?= number_format($precio_base, 2) ?></td>
                         <td><?= number_format($descuento, 2) ?></td>
                         <td><?= number_format($cuarto['precio']*$dias_estadia, 2) ?></td>
+                        <?php $sub_total +=  $cuarto['precio']*$dias_estadia?>
                     </tr>
-                    <?php } ?>
+                    <?php } }?>
 
                     <?php foreach ($reserva_mesa as $mesa) {
                     ?>
@@ -551,8 +553,11 @@
                         <td><?= number_format($mesa['precio_reservam'], 2) ?></td>
                         <td>-</td>
                         <td><?= number_format($mesa['precio_reservam'], 2) ?></td>
+                        <?php $sub_total +=  $mesa['precio_reservam']?>
                     </tr>
                     <?php } ?>
+                    <?php $IGV = $sub_total * 0.18;?>
+                    <?php $total_pago = $sub_total + $IGV;?>
                 </tbody>
             </table>
 

@@ -74,9 +74,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_reserva'])) {
             if (!$conn->query($query_restaurante)) {
                 die("Error al registrar consumo de plato: " . $conn->error);
             }
+        } elseif ($pedido['tipo'] === 'habitacion') {
+            // Insertar en consumo_restaurante
+            $query_restaurante = "
+                INSERT INTO consumo_habitacion (id_cuenta, id_servicio, cantidad, subtotal, fecha_consumo)
+                VALUES ($id_cuenta, $id_item, $cantidad, $subtotal, '$fecha_actual')
+            ";
+            if (!$conn->query($query_restaurante)) {
+                die("Error al registrar consumo de plato: " . $conn->error);
+            }
         }
     }
-
     // Actualizar el total en cuenta_cobranza
     $query_actualizar_cuenta = "
         UPDATE cuenta_cobranza SET monto = monto + $total WHERE id_cuenta = $id_cuenta
