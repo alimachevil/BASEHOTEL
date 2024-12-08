@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['consultar_mesas'])) {
         $stmt_mesas_disponibles = $conn->prepare($sql_mesas_disponibles);
         $stmt_mesas_disponibles->bind_param(str_repeat('i', count($mesas_reservadas)), ...$mesas_reservadas);
     } else {
-        $sql_mesas_disponibles = "SELECT * FROM mesas";
+        $sql_mesas_disponibles = "SELECT m.id_mesa, m.descripcion, m.precio_reservam, t.tipo FROM mesas m JOIN tipo_mesa t ON m.id_tipo = t.id_tipo";
         $stmt_mesas_disponibles = $conn->prepare($sql_mesas_disponibles);
     }
 

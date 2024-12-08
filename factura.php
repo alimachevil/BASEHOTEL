@@ -497,7 +497,7 @@
                     <p>-</p>
                     <p>20505670443</p>
                     <p>NESSUS HOTELES PERU S.A.</p>
-                    <p>JR. 7 DE JUNIO NRO. 581 INT. 03 CERCADO PUNO - SAN</p>
+                    <p><?=$direccion_hotel ?> - <?=$ciudad_hotel ?></p>
                     <p>PEN</p>
                 </div>
             </div>
