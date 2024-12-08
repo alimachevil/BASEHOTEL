@@ -382,6 +382,70 @@ table tbody tr:hover {
     text-align: center;
     margin: 30px 0;
 }
+/* CODIGO PARA ARREGLAR */
+/* Contenedor principal para la sección de contenido */
+.content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 30px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: 'Lato', sans-serif;
+    overflow-y: auto; /* Permite desplazamiento solo en el contenido restante */
+    padding-top: 80px; /* Espacio superior suficiente para evitar corte */
+}
+
+/* Título y párrafo superior */
+.content h2,
+.content p {
+    margin: 0;
+    padding: 0;
+    margin-bottom: 20px; /* Añadir espacio entre el título y el contenido */
+}
+
+/* Formulario para la selección de fechas o meses */
+.formulario {
+    margin-top: 20px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Tabla en la sección de contenido */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+table thead {
+    background-color: #D69C4F;
+    color: white;
+    font-size: 18px;
+}
+
+table th,
+table td {
+    text-align: left;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #f5f5f5;
+}
+
+table tbody tr:hover {
+    background-color: #f1e0c5;
+}
+
 
     </style>
 </head>

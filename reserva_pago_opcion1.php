@@ -86,17 +86,7 @@ if (!isset($_SESSION['id_reserva'])) {
         <title>Ingresar Código de Reserva</title>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <style>
-        /* Estilo general */
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #FFFFFF;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+
 
         .container {
             background-color: #ffffff;
@@ -173,8 +163,11 @@ if (!isset($_SESSION['id_reserva'])) {
             margin: 0;
             padding: 0;
             display: flex;
-            height: 100vh;
+            height:100vh;
             background-color: #FFFFFF;
+            justify-content: center;
+            align-items: center;
+             /* Asegura que el contenido principal llene la ventana */
         }
         .sidebar {
             width: 250px;
@@ -283,7 +276,6 @@ if (!isset($_SESSION['id_reserva'])) {
             padding: 30px;
             display: flex;
             flex-direction: column;
-            position: fixed;
             justify-content: center;
             align-items: center;
             background-color: #fff;
@@ -346,9 +338,6 @@ if (!isset($_SESSION['id_reserva'])) {
                     <a href="reportes.php?reporte=ranking_productos_restaurante"><i class="fas fa-cocktail"></i>Ranking Productos Restaurante</a>
                     <a href="reportes.php?reporte=ranking_bebidas_bar"><i class="fas fa-beer"></i>Ranking Bebidas Bar</a>
                 </div>
-            </form>
-            <form action="consulta_consumo.php" method="GET">
-                <button type="submit"><i class="fas fa-file"></i>Consumo Total</button>
             </form>
         </div>
     </div>
@@ -498,6 +487,7 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
     <title>Registro de Huéspedes</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        
     body {
         font-family: 'Lato', 'Roboto', sans-serif !important;
         background-color: #f4f4f9;
@@ -506,7 +496,7 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        min-height: 100vh;
     }
 
     .container {
@@ -578,191 +568,7 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
         transition: background-color 0.3s ease;
     }
 
-    .add-btn {
-        background-color: #007bff;
-    }
-
-    .add-btn:hover {
-        background-color: #0056b3;
-    }
-
-    .submit-btn {
-        background-color: #28a745;
-    }
-
-    .submit-btn:hover {
-        background-color: #218838;
-    }
-
-    .delete-btn {
-        background-color: #dc3545;
-        color: #fff;
-        padding: 8px 12px;
-        font-size: 14px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-
-    .delete-btn:hover {
-        background-color: #c82333;
-        transform: scale(1.05);
-    }
-
-    .delete-btn:active {
-        background-color: #a71d2a;
-    }
-    /* Estilos generales */
-    body {
-            font-family: 'Lato', 'Roboto', sans-serif !important;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            height: 100vh;
-            background-color: #f4f4f4;
-        }
-        .sidebar {
-            width: 250px;
-            background-color: #333;
-            color: white;
-            padding-top: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            height: 100%;
-        }
-        .sidebar img {
-            width: 80%;
-            max-width: 150px;
-            margin-bottom: 20px;
-        }
-        .sidebar h2 {
-            text-align: center;
-            font-weight: bold;
-            font-size: 18px;
-            padding-bottom: 7px;
-            display: inline-flex;
-            align-items: center;
-            position: relative;
-            color: #fff;
-            margin-bottom: 30px;
-        }
-        .menu {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-        }
-        .menu form {
-            width: 100%;
-            margin-bottom: 0;
-        }
-        .menu button {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            font-size: 16px;
-            background-color: #333;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s, color 0.3s;
-            width: 100%;
-            margin-bottom: 0;
-        }
-        .menu button:hover {
-            background-color: #D69C4F;
-            color: black;
-        }
-        .menu button i {
-            margin-right: 10px;
-        }
-
-        /* Estilos del submenú (opciones dentro del botón PEDIDOS) */
-        .submenu {
-            display: none;
-            flex-direction: column;
-            width: 100%;
-            margin-top: 10px;
-        }
-        .submenu a {
-            display: flex;
-            align-items: center;
-            padding: 10px 15px;
-            font-size: 16px;
-            background-color: #333;
-            color: white;
-            text-decoration: none;
-            border: none;
-            transition: background-color 0.3s, color 0.3s;
-            padding-left: 30px; /* Agregar desplazamiento a la derecha */
-        }
-        .submenu a:hover {
-            background-color: #D69C4F;
-            color: black;
-        }
-        .submenu a i {
-            margin-right: 10px;
-        }
-
-        /* Efecto de deslizamiento hacia abajo */
-        .menu button.active + .submenu {
-            display: flex;
-            animation: slideDown 0.3s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                max-height: 0;
-            }
-            to {
-                opacity: 1;
-                max-height: 500px;
-            }
-        }
-
-        /* Estilos para la sección de contenido a la derecha */
-        .content {
-            flex-grow: 1;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: #fff;
-        }
-        .content h2 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .content p {
-            font-size: 18px;
-            color: #555;
-            margin-bottom: 40px;
-        }
-        .content .option-box {
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            gap: 20px;
-        }
-        .content .option-box div {
-            padding: 20px;
-            background-color: #28a745;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            text-align: center;
-            flex: 1;
-        }
-        .content .option-box div:hover {
-            background-color: #218838;
-        }
-        /* Estilos generales */
+    
         body {
             font-family: 'Lato', 'Roboto', sans-serif !important;
             margin: 0;
@@ -882,35 +688,7 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
             align-items: center;
             background-color: #FFFFFF;
         }
-        .content h2 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .content p {
-            font-size: 18px;
-            color: #555;
-            margin-bottom: 40px;
-        }
-        .content .option-box {
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            gap: 20px;
-        }
-        .content .option-box div {
-            padding: 20px;
-            background-color: #28a745;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            text-align: center;
-            flex: 1;
-        }
-        .content .option-box div:hover {
-            background-color: #218838;
-        }
+        
         /*NUEVO ESTILO DE FORMULARIO*/
         /* General Styles */
 
@@ -1012,6 +790,11 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
     border: none;
 }
 
+.delete-btnform{
+    height:50px;
+    margin-top:20px;
+}
+
 .delete-btn:hover {
     background-color: #FF6666;
     color: #121212;
@@ -1036,6 +819,18 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
 </style>
 
     <script>
+        function ajustarAlturaBody(valor) {
+    const body = document.body;
+    const alturaBase = 100; // Altura base en vh
+    const alturaActual = parseFloat(window.getComputedStyle(body).height) / window.innerHeight * 100 || alturaBase; // Calcula la altura actual en vh
+    
+    // Calcula la nueva altura asegurándote de no bajar de la altura base
+    const nuevaAltura = Math.max(alturaBase, alturaActual + valor);
+
+    // Ajusta la altura del body
+    body.style.height = nuevaAltura + "vh";
+}
+
         // Función para agregar un formulario de huésped
         function agregarFormulario(idHabitacion, maxFormularios) {
             const contenedor = document.getElementById(`habitacion-${idHabitacion}`);
@@ -1058,8 +853,9 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
                     <label>Celular: <input type="text" name="huéspedes[${totalFormularios}][celular]"></label>
                     <label>País: <input type="text" name="huéspedes[${totalFormularios}][pais]" required></label>
                     <label>Correo: <input type="email" name="huéspedes[${totalFormularios}][correo]"></label>
-                    <button type="button" class="btn delete-btn" onclick="eliminarFormulario(this)">Eliminar</button>
+                    <button type="button" class="btn delete-btn delete-btnform" onclick="eliminarFormulario(this)">Eliminar</button>
                 `;
+                ajustarAlturaBody(45); // Incrementa en 45vh
                 contenedor.appendChild(nuevoFormulario);
             } else {
                 alert('No se pueden agregar más huéspedes para esta habitación.');
@@ -1069,6 +865,7 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
         // Función para eliminar un formulario de huésped
         function eliminarFormulario(boton) {
             boton.parentElement.remove();
+            ajustarAlturaBody(-45); // Decrementa en 45vh
         }
     </script>
 </head>
@@ -1098,9 +895,6 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
                     <a href="reportes.php?reporte=ranking_productos_restaurante"><i class="fas fa-cocktail"></i>Ranking Productos Restaurante</a>
                     <a href="reportes.php?reporte=ranking_bebidas_bar"><i class="fas fa-beer"></i>Ranking Bebidas Bar</a>
                 </div>
-            </form>
-            <form action="consulta_consumo.php" method="GET">
-                <button type="submit"><i class="fas fa-file"></i>Consumo Total</button>
             </form>
         </div>
     </div>

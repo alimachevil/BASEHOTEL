@@ -28,12 +28,12 @@ $stmt->fetch();
 $stmt->close();
 
 // Obtener información del hotel
-$query_hotel = "SELECT nombre, direccion, ciudad, telefono, email, categoria 
+$query_hotel = "SELECT nombre, direccion, ciudad, telefono, email 
                 FROM hoteles WHERE id_hotel = ?";
 $stmt = $conn->prepare($query_hotel);
 $stmt->bind_param('i', $id_hotel);
 $stmt->execute();
-$stmt->bind_result($nombre_hotel, $direccion_hotel, $ciudad_hotel, $telefono_hotel, $email_hotel, $categoria_hotel);
+$stmt->bind_result($nombre_hotel, $direccion_hotel, $ciudad_hotel, $telefono_hotel, $email_hotel);
 $stmt->fetch();
 $stmt->close();
 
