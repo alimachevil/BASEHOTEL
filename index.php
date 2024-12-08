@@ -8,10 +8,10 @@ session_destroy();
 session_start();
 
 // Datos de conexión a la base de datos
-$host = 'localhost';
-$user = 'root';
-$pass = '';
-$dbname = 'hotel_db';
+$host = 'srv1006.hstgr.io';
+$user = 'u472469844_est18';
+$pass = '#Bd00018';
+$dbname = 'u472469844_est18';
 
 // Conexión a la base de datos MySQL
 $conn = new mysqli($host, $user, $pass, $dbname);
@@ -329,6 +329,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <option value="4">Cusco</option>
                         <option value="1">Arequipa</option>
                         <option value="8">Tacna</option>
+                        <option value="3">Ayacucho</option>
+                        <option value="5">Ica</option>
+                        <option value="6">Moquegua</option>
+                        <option value="7">Nazca</option>
+                        <option value="7">Tarapoto</option>
                     </select>
                 </div>
             </div>
@@ -337,6 +342,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </form>
     </div>
+
+<!-- Sección Información de Hotel -->
+<section class="py-5 bg-dark text-white">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h2 class="text-center mb-4">Casa Andina Select Arequipa Plaza</h2>
+
+                <!-- Contenedor flex para los elementos uno al lado del otro -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <!-- Dirección -->
+                    <div class="d-flex flex-column text-center">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="bi bi-cup-hot me-2" style="color: #D69C4F;"></i>
+                            <p class="mb-0"><strong>Restaurante:</strong></p>
+                        </div>
+                        <p>Desayuno | Almuerzo | Cena</p>
+                    </div>
+                    <div class="border-start mx-4"></div> <!-- Barra lateral -->
+
+                    <!-- Teléfono -->
+                    <div class="d-flex flex-column text-center">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="bi bi-telephone-fill me-2" style="color: #D69C4F;"></i>
+                            <p class="mb-0"><strong>Teléfono:</strong></p>
+                        </div>
+                        <p>(+51) 54-412930</p>
+                    </div>
+                    <div class="border-start mx-4"></div> <!-- Barra lateral -->
+
+                    <!-- Check-in -->
+                    <div class="d-flex flex-column text-center">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="bi bi-calendar-check-fill me-2" style="color: #D69C4F;"></i>
+                            <p class="mb-0"><strong>Check-in:</strong></p>
+                        </div>
+                        <p>2:00 pm</p>
+                    </div>
+                    <div class="border-start mx-4"></div> <!-- Barra lateral -->
+
+                    <!-- Check-out -->
+                    <div class="d-flex flex-column text-center">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="bi bi-calendar-x-fill me-2" style="color: #D69C4F;"></i>
+                            <p class="mb-0"><strong>Check-out:</strong></p>
+                        </div>
+                        <p>12:00 pm</p>
+                    </div>
+                </div>
+
+                <!-- Descripción del hotel -->
+                <p class="text-justify">
+                    Vista Andina Hoteles se encuentra en todo el Perú y a pasos de los principales sitios turísticos. Destacan sus majestuosos portales de sillar que transmiten la belleza e historia del lugar. Aquí disfrutarás de un desayuno y una amplia carta de platos en La Plaza Bar & Grill desde donde tendrás una vista espectacular de la Plaza de Armas. 
+                    Tenemos 3 amplias salas y un directorio con capacidad para realizar eventos de hasta 80 personas. Además, contamos con una piscina y sala de masajes para relajarte después de días llenos de excursiones y, para el entretenimiento nocturno con tus amigos o pareja, disfruta nuestro bar con variados tragos y ambiente acogedor. 
+                    Reservar un hotel cerca al centro de la ciudad vale la pena por su estratégica ubicación y belleza del centro histórico. Vista Andina Hoteles, sin duda, es tu mejor elección.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+
+
 
     <!-- Servicios Destacados -->
     <section class="py-5 services">

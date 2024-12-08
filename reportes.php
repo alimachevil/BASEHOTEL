@@ -3,10 +3,10 @@
 session_start();
 
 // Conexión a la base de datos
-$host = "localhost"; // Cambiar según tu configuración
-$user = "root";      // Usuario de la base de datos
-$password = "";      // Contraseña de la base de datos
-$dbname = "hotel_db";   // Nombre de la base de datos
+$host = "srv1006.hstgr.io"; // Cambiar según tu configuración
+$user = "u472469844_est18";      // Usuario de la base de datos
+$password = "#Bd00018";      // Contraseña de la base de datos
+$dbname = "u472469844_est18";   // Nombre de la base de datos
 $conn = new mysqli($host, $user, $password, $dbname);
 
 // Verificar la conexión

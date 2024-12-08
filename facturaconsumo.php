@@ -2,10 +2,10 @@
 session_start();
 
 // Conexión a la base de datos
-$host = 'localhost';
-$user = 'root';
-$pass = '';
-$dbname = 'hotel_db';
+$host = 'srv1006.hstgr.io';
+$user = 'u472469844_est18';
+$pass = '#Bd00018';
+$dbname = 'u472469844_est18';
 $conn = new mysqli($host, $user, $pass, $dbname);
 
 // Verificar la conexión
