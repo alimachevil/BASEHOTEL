@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['consultar_mesas'])) {
 
     // Mostrar mesas disponibles
     if (count($mesas_reservadas) > 0) {
-        $sql_mesas_disponibles = "SELECT * FROM mesas WHERE id_mesa NOT IN (" . implode(",", array_fill(0, count($mesas_reservadas), '?')) . ")";
+        $sql_mesas_disponibles = "SELECT m.id_mesa, m.descripcion, m.precio_reservam, t.tipo FROM mesas m JOIN tipo_mesa t ON m.id_tipo = t.id_tipo WHERE id_mesa NOT IN (" . implode(",", array_fill(0, count($mesas_reservadas), '?')) . ")";
         $stmt_mesas_disponibles = $conn->prepare($sql_mesas_disponibles);
         $stmt_mesas_disponibles->bind_param(str_repeat('i', count($mesas_reservadas)), ...$mesas_reservadas);
     } else {

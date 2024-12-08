@@ -103,8 +103,7 @@ for ($i = 0; $i < $habitaciones; $i++) {
         SELECT c.*, t.nombre AS tipo_cuarto, c.descripcion
         FROM cuartos c
         JOIN tipo_cuarto t ON c.id_tipo = t.id_tipo
-        WHERE c.estado = 'Disponible'
-        AND c.capacidad_adultos >= $capacidad_adultos
+        WHERE c.capacidad_adultos >= $capacidad_adultos
         AND c.capacidad_niños >= $capacidad_ninos
         $not_in_clause
         AND c.id_cuarto NOT IN (
