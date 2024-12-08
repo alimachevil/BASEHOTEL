@@ -83,11 +83,12 @@ if (!isset($_SESSION['id_reserva'])) {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Ingresar Código de Reserva</title>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         <style>
         /* Estilo general */
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
+            background-color: #FFFFFF;
             margin: 0;
             padding: 0;
             display: flex;
@@ -143,13 +144,14 @@ if (!isset($_SESSION['id_reserva'])) {
         }
 
         input[type="text"]:focus {
-            border-color: #007bff;
+            border-color: #C88942;
         }
 
         button {
-            background-color: #007bff;
+            background-color: #D69C4F;
             color: #fff;
             font-size: 16px;
+            font-weight: normal;
             padding: 10px;
             border: none;
             border-radius: 5px;
@@ -158,28 +160,255 @@ if (!isset($_SESSION['id_reserva'])) {
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: #C88942;
         }
 
         button:active {
             transform: scale(0.98);
         }
+        /* Estilos generales */
+        body {
+            font-family: 'Lato', 'Roboto', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #FFFFFF;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #333;
+            color: white;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100%;
+        }
+        .sidebar img {
+            width: 80%;
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+        .sidebar h2 {
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            padding-bottom: 7px;
+            display: inline-flex;
+            align-items: center;
+            position: relative;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+        .menu {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .menu form {
+            width: 100%;
+            margin-bottom: 0;
+        }
+        .menu button {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            font-size: 16px;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            width: 100%;
+            margin-bottom: 0;
+        }
+        .menu button:hover {
+            background-color: #D69C4F;
+            color: black;
+        }
+        .menu button i {
+            margin-right: 10px;
+        }
+
+        /* Estilos del submenú (opciones dentro del botón PEDIDOS) */
+        .submenu {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .submenu a {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            border: none;
+            transition: background-color 0.3s, color 0.3s;
+            padding-left: 30px; /* Agregar desplazamiento a la derecha */
+        }
+        .submenu a:hover {
+            background-color: #D69C4F;
+            color: black;
+        }
+        .submenu a i {
+            margin-right: 10px;
+        }
+
+        /* Efecto de deslizamiento hacia abajo */
+        .menu button.active + .submenu {
+            display: flex;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 500px;
+            }
+        }
+
+        /* Estilos para la sección de contenido a la derecha */
+        .content {
+            flex-grow: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+        }
+        .content h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .content p {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 40px;
+        }
+        .content .option-box {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+        }
+        .content .option-box div {
+            padding: 20px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+            flex: 1;
+        }
+        .content .option-box div:hover {
+            background-color: #218838;
+        }
+        
     </style>
     </head>
     <body>
-        <div class="container">
-            <h1>Ingresar Código de Reserva</h1>
-            <?php if (isset($error)): ?>
-                <p class="error"><?php echo htmlspecialchars($error); ?></p>
-            <?php endif; ?>
-            <form method="POST">
-                <label for="codigo_reserva">Código de Reserva:</label>
-                <input type="text" id="codigo_reserva" name="codigo_reserva" placeholder="Ingrese su código" required>
-                <button type="submit">Buscar</button>
+    <div class="sidebar">
+        <!-- Espacio para el logo -->
+        <img src="images/logo.png" alt="Logo">
+        <h2>Panel de Control del Administrador</h2>
+        <div class="menu">
+            <form action="reserva_pago_opcion1.php" method="GET">
+                <button type="submit"><i class="fas fa-user"></i>Datos de Acompañantes</button>
+            </form>
+            <form action="pedido_restaurante_bar.php" method="GET">
+                <button type="submit" id="pedidosBtn"><i class="fas fa-utensils"></i>Pedidos</button>
+                <div class="submenu" id="submenuPedidos">
+                    <a href="pedido_restaurante_bar.php#restaurante"><i class="fas fa-cocktail"></i>Restaurante</a>
+                    <a href="pedido_restaurante_bar.php#bar"><i class="fas fa-beer"></i>Bar</a>
+                    <a href="pedido_restaurante_bar.php#habitacion"><i class="fas fa-bed"></i>Habitación</a>
+                </div>
+            </form>
+            <form action="reportes.php" method="GET">
+                <button type="submit" id="reportesBtn"><i class="fas fa-file-alt"></i>Reportes</button>
+                <div class="submenu" id="submenuReportes">
+                    <a href="reportes.php?reporte=listado_huespedes"><i class="fas fa-users"></i>Listado de Huéspedes</a>
+                    <a href="reportes.php?reporte=ranking_habitaciones"><i class="fas fa-bed"></i>Ranking de Cuartos</a>
+                    <a href="reportes.php?reporte=reporte_monto_restaurante"><i class="fas fa-utensils"></i>Reporte Monto Restaurante</a>
+                    <a href="reportes.php?reporte=ranking_productos_restaurante"><i class="fas fa-cocktail"></i>Ranking Productos Restaurante</a>
+                    <a href="reportes.php?reporte=ranking_bebidas_bar"><i class="fas fa-beer"></i>Ranking Bebidas Bar</a>
+                </div>
             </form>
         </div>
-    </body>
-    </html>
+    </div>
+    <div class="content">
+        <div class="container">
+                <h1>Ingresar Código de Reserva</h1>
+                <?php if (isset($error)): ?>
+                    <p class="error"><?php echo htmlspecialchars($error); ?></p>
+                <?php endif; ?>
+                <form method="POST">
+                    <label for="codigo_reserva">Código de Reserva:</label>
+                    <input type="text" id="codigo_reserva" name="codigo_reserva" placeholder="Ingrese su código" required>
+                    <button type="submit">Buscar</button>
+                </form>
+        </div>  
+    </div>
+    <script>
+        // Obtener el contenedor del botón "Pedidos" y el submenú
+        const pedidosBtn = document.getElementById('pedidosBtn');
+        const submenuPedidos = document.getElementById('submenuPedidos');
+        
+        // Mostrar el submenú cuando se pasa el ratón sobre "Pedidos"
+        pedidosBtn.addEventListener('mouseover', function() {
+            submenuPedidos.style.display = 'flex'; // Mostrar el submenú
+        });
+
+        // Mantener el submenú abierto cuando se pasa el ratón sobre el submenú
+        submenuPedidos.addEventListener('mouseover', function() {
+            submenuPedidos.style.display = 'flex'; // Mantenerlo abierto
+        });
+
+        // Cerrar el submenú cuando el ratón sale del botón "Pedidos" o el submenú
+        pedidosBtn.addEventListener('mouseout', function() {
+            setTimeout(() => {
+                if (!submenuPedidos.matches(':hover') && !pedidosBtn.matches(':hover')) {
+                    submenuPedidos.style.display = 'none'; // Ocultar el submenú si no está sobre él
+                }
+            }, 100); // Retraso para evitar un cierre inmediato
+        });
+
+        // Obtener el contenedor del botón "Reportes" y el submenú de reportes
+        const reportesBtn = document.getElementById('reportesBtn');
+        const submenuReportes = document.getElementById('submenuReportes');
+
+        // Mostrar el submenú cuando se pasa el ratón sobre "Reportes"
+        reportesBtn.addEventListener('mouseover', function() {
+            submenuReportes.style.display = 'flex'; // Mostrar el submenú
+        });
+
+        // Mantener el submenú abierto cuando se pasa el ratón sobre el submenú
+        submenuReportes.addEventListener('mouseover', function() {
+            submenuReportes.style.display = 'flex'; // Mantenerlo abierto
+        });
+
+        // Cerrar el submenú cuando el ratón sale del botón "Reportes" o el submenú
+        reportesBtn.addEventListener('mouseout', function() {
+            setTimeout(() => {
+                if (!submenuReportes.matches(':hover') && !reportesBtn.matches(':hover')) {
+                    submenuReportes.style.display = 'none'; // Ocultar el submenú si no está sobre él
+                }
+            }, 100); // Retraso para evitar un cierre inmediato
+        });
+    </script>
+</body>
+</html>
     <?php
     exit();
 }
@@ -265,7 +494,7 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
     body {
-        font-family: Arial, sans-serif;
+        font-family: 'Lato', 'Roboto', sans-serif !important;
         background-color: #f4f4f9;
         margin: 0;
         padding: 0;
@@ -308,9 +537,8 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
-        background-color: #f9f9f9;
+        background-color: #FFFFFF;
         padding: 10px;
-        border: 1px solid #ddd;
         border-radius: 5px;
     }
 
@@ -380,6 +608,426 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
     .delete-btn:active {
         background-color: #a71d2a;
     }
+    /* Estilos generales */
+    body {
+            font-family: 'Lato', 'Roboto', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #333;
+            color: white;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100%;
+        }
+        .sidebar img {
+            width: 80%;
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+        .sidebar h2 {
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            padding-bottom: 7px;
+            display: inline-flex;
+            align-items: center;
+            position: relative;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+        .menu {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .menu form {
+            width: 100%;
+            margin-bottom: 0;
+        }
+        .menu button {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            font-size: 16px;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            width: 100%;
+            margin-bottom: 0;
+        }
+        .menu button:hover {
+            background-color: #D69C4F;
+            color: black;
+        }
+        .menu button i {
+            margin-right: 10px;
+        }
+
+        /* Estilos del submenú (opciones dentro del botón PEDIDOS) */
+        .submenu {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .submenu a {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            border: none;
+            transition: background-color 0.3s, color 0.3s;
+            padding-left: 30px; /* Agregar desplazamiento a la derecha */
+        }
+        .submenu a:hover {
+            background-color: #D69C4F;
+            color: black;
+        }
+        .submenu a i {
+            margin-right: 10px;
+        }
+
+        /* Efecto de deslizamiento hacia abajo */
+        .menu button.active + .submenu {
+            display: flex;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 500px;
+            }
+        }
+
+        /* Estilos para la sección de contenido a la derecha */
+        .content {
+            flex-grow: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+        }
+        .content h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .content p {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 40px;
+        }
+        .content .option-box {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+        }
+        .content .option-box div {
+            padding: 20px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+            flex: 1;
+        }
+        .content .option-box div:hover {
+            background-color: #218838;
+        }
+        /* Estilos generales */
+        body {
+            font-family: 'Lato', 'Roboto', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #FFFFFF;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #333;
+            color: white;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100%;
+        }
+        .sidebar img {
+            width: 80%;
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+        .sidebar h2 {
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            padding-bottom: 7px;
+            display: inline-flex;
+            align-items: center;
+            position: relative;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+        .menu {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .menu form {
+            width: 100%;
+            margin-bottom: 0;
+        }
+        .menu button {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            font-size: 16px;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            width: 100%;
+            margin-bottom: 0;
+        }
+        .menu button:hover {
+            background-color: #D69C4F;
+            color: black;
+        }
+        .menu button i {
+            margin-right: 10px;
+        }
+
+        /* Estilos del submenú (opciones dentro del botón PEDIDOS) */
+        .submenu {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .submenu a {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            border: none;
+            transition: background-color 0.3s, color 0.3s;
+            padding-left: 30px; /* Agregar desplazamiento a la derecha */
+        }
+        .submenu a:hover {
+            background-color: #D69C4F;
+            color: black;
+        }
+        .submenu a i {
+            margin-right: 10px;
+        }
+
+        /* Efecto de deslizamiento hacia abajo */
+        .menu button.active + .submenu {
+            display: flex;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 500px;
+            }
+        }
+
+        /* Estilos para la sección de contenido a la derecha */
+        .content {
+            flex-grow: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #FFFFFF;
+        }
+        .content h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .content p {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 40px;
+        }
+        .content .option-box {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+        }
+        .content .option-box div {
+            padding: 20px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+            flex: 1;
+        }
+        .content .option-box div:hover {
+            background-color: #218838;
+        }
+        /*NUEVO ESTILO DE FORMULARIO*/
+        /* General Styles */
+
+/* Container */
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #FFFFFF; /* Negro profundo para contraste */
+    border: 2px solid #D69C4F; /* Borde dorado */
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Titles */
+.title {
+    font-size: 28px;
+    text-align: center;
+    color: #D69C4F;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 18px;
+    text-align: center;
+    color: #E1B97C; /* Tono más claro del dorado */
+    margin-bottom: 20px;
+}
+
+/* Form Styles */
+.guest-form label {
+    display: block;
+    margin-bottom: 10px;
+    color: #D69C4F;
+    font-weight: bold;
+}
+
+.guest-form input,
+.guest-form select {
+    width: calc(100% - 10px);
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #D69C4F;
+    border-radius: 5px;
+    background-color: #FFFFFF;
+    color: #FFFFFF;
+    font-size: 14px;
+}
+
+.guest-form input:focus,
+.guest-form select:focus {
+    border-color: #E1B97C;
+    outline: none;
+    box-shadow: 0 0 8px rgba(214, 156, 79, 0.8);
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #FFFFFF;
+    background-color: #D69C4F;
+    border: none;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #E1B97C;
+    color: #121212;
+    transform: scale(1.05);
+}
+
+.add-btn {
+    margin-right: 10px;
+}
+
+.submit-btn {
+    background-color: #121212;
+    border: 1px solid #D69C4F;
+    color: #D69C4F;
+}
+
+.submit-btn:hover {
+    background-color: #D69C4F;
+    color: #FFFFFF;
+}
+
+/* Reset Button */
+.delete-btn {
+    color: #FFFFFF;
+    background-color: #FF4D4D; /* Rojo llamativo */
+    border: none;
+}
+
+.delete-btn:hover {
+    background-color: #FF6666;
+    color: #121212;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    .title {
+        font-size: 24px;
+    }
+    .subtitle {
+        font-size: 16px;
+    }
+    .btn {
+        font-size: 14px;
+    }
+}
+ 
 </style>
 
     <script>
@@ -420,52 +1068,131 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
     </script>
 </head>
 <body>
-    <div class="container">
-        <h1 class="title">Registro de Huéspedes</h1>
-        <h2 class="subtitle">Habitación <?php echo htmlspecialchars($habitacion_actual['numero']); ?> 
-        (Máximo <?php echo $maxHuespedes; ?> huéspedes)</h2>
-        <form class="guest-form" method="POST">
-            <div id="habitacion-<?php echo $habitacion_actual['id_cuarto']; ?>" 
-                data-max-formularios="<?php echo $maxHuespedes; ?>">
-                <div class="huesped-form">
-                    <label>Nombre:
-                        <input type="text" name="huéspedes[0][nombre]" required>
-                    </label>
-                    <label>Apellido:
-                        <input type="text" name="huéspedes[0][apellido]" required>
-                    </label>
-                    <label>Tipo de Documento:
-                        <select name="huéspedes[0][tipo_documento]" required>
-                            <option value="DNI">DNI</option>
-                            <option value="Pasaporte">Pasaporte</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                    </label>
-                    <label>Número de Documento:
-                        <input type="text" name="huéspedes[0][nro_documento]" required>
-                    </label>
-                    <label>Celular:
-                        <input type="text" name="huéspedes[0][celular]">
-                    </label>
-                    <label>País:
-                        <input type="text" name="huéspedes[0][pais]" required>
-                    </label>
-                    <label>Correo:
-                        <input type="email" name="huéspedes[0][correo]">
-                    </label>
+    <div class="sidebar">
+        <!-- Espacio para el logo -->
+        <img src="images/logo.png" alt="Logo">
+        <h2>Panel de Control del Administrador</h2>
+        <div class="menu">
+            <form action="reserva_pago_opcion1.php" method="GET">
+                <button type="submit"><i class="fas fa-user"></i>Datos de Acompañantes</button>
+            </form>
+            <form action="pedido_restaurante_bar.php" method="GET">
+                <button type="submit" id="pedidosBtn"><i class="fas fa-utensils"></i>Pedidos</button>
+                <div class="submenu" id="submenuPedidos">
+                    <a href="pedido_restaurante_bar.php#restaurante"><i class="fas fa-cocktail"></i>Restaurante</a>
+                    <a href="pedido_restaurante_bar.php#bar"><i class="fas fa-beer"></i>Bar</a>
+                    <a href="pedido_restaurante_bar.php#habitacion"><i class="fas fa-bed"></i>Habitación</a>
                 </div>
-            </div>
-            <div class="buttons">
-                <button type="button" class="btn add-btn" 
-                    onclick="agregarFormulario(<?php echo $habitacion_actual['id_cuarto']; ?>, 
-                    <?php echo $maxHuespedes; ?>)">
-                    Agregar Huésped
-                </button>
-                <button type="submit" class="btn submit-btn">Registrar Huéspedes</button>
-            </div>
-        </form>
+            </form>
+            <form action="reportes.php" method="GET">
+                <button type="submit" id="reportesBtn"><i class="fas fa-file-alt"></i>Reportes</button>
+                <div class="submenu" id="submenuReportes">
+                    <a href="reportes.php?reporte=listado_huespedes"><i class="fas fa-users"></i>Listado de Huéspedes</a>
+                    <a href="reportes.php?reporte=ranking_habitaciones"><i class="fas fa-bed"></i>Ranking de Cuartos</a>
+                    <a href="reportes.php?reporte=reporte_monto_restaurante"><i class="fas fa-utensils"></i>Reporte Monto Restaurante</a>
+                    <a href="reportes.php?reporte=ranking_productos_restaurante"><i class="fas fa-cocktail"></i>Ranking Productos Restaurante</a>
+                    <a href="reportes.php?reporte=ranking_bebidas_bar"><i class="fas fa-beer"></i>Ranking Bebidas Bar</a>
+                </div>
+            </form>
+        </div>
     </div>
+    <div class="content">
+        <div class="container">
+            <h1 class="title">Registro de Huéspedes</h1>
+            <h2 class="subtitle">Habitación <?php echo htmlspecialchars($habitacion_actual['numero']); ?> 
+            (Máximo <?php echo $maxHuespedes; ?> huéspedes)</h2>
+            <form class="guest-form" method="POST">
+                <div id="habitacion-<?php echo $habitacion_actual['id_cuarto']; ?>" 
+                    data-max-formularios="<?php echo $maxHuespedes; ?>">
+                    <div class="huesped-form">
+                        <label>Nombre:
+                            <input type="text" name="huéspedes[0][nombre]" required>
+                        </label>
+                        <label>Apellido:
+                            <input type="text" name="huéspedes[0][apellido]" required>
+                        </label>
+                        <label>Tipo de Documento:
+                            <select name="huéspedes[0][tipo_documento]" required>
+                                <option value="DNI">DNI</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </label>
+                        <label>Número de Documento:
+                            <input type="text" name="huéspedes[0][nro_documento]" required>
+                        </label>
+                        <label>Celular:
+                            <input type="text" name="huéspedes[0][celular]">
+                        </label>
+                        <label>País:
+                            <input type="text" name="huéspedes[0][pais]" required>
+                        </label>
+                        <label>Correo:
+                            <input type="email" name="huéspedes[0][correo]">
+                        </label>
+                    </div>
+                </div>
+                <div class="buttons">
+                    <button type="button" class="btn add-btn" 
+                        onclick="agregarFormulario(<?php echo $habitacion_actual['id_cuarto']; ?>, 
+                        <?php echo $maxHuespedes; ?>)">
+                        Agregar Huésped
+                    </button>
+                    <button type="submit" class="btn submit-btn">Registrar Huéspedes</button>
+                </div>
+            </form>
+            <!-- Botón para reiniciar sesión y salir -->
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="?reset=1" class="btn delete-btn">Salir y Reiniciar</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Obtener el contenedor del botón "Pedidos" y el submenú
+        const pedidosBtn = document.getElementById('pedidosBtn');
+        const submenuPedidos = document.getElementById('submenuPedidos');
+        
+        // Mostrar el submenú cuando se pasa el ratón sobre "Pedidos"
+        pedidosBtn.addEventListener('mouseover', function() {
+            submenuPedidos.style.display = 'flex'; // Mostrar el submenú
+        });
+
+        // Mantener el submenú abierto cuando se pasa el ratón sobre el submenú
+        submenuPedidos.addEventListener('mouseover', function() {
+            submenuPedidos.style.display = 'flex'; // Mantenerlo abierto
+        });
+
+        // Cerrar el submenú cuando el ratón sale del botón "Pedidos" o el submenú
+        pedidosBtn.addEventListener('mouseout', function() {
+            setTimeout(() => {
+                if (!submenuPedidos.matches(':hover') && !pedidosBtn.matches(':hover')) {
+                    submenuPedidos.style.display = 'none'; // Ocultar el submenú si no está sobre él
+                }
+            }, 100); // Retraso para evitar un cierre inmediato
+        });
+
+        // Obtener el contenedor del botón "Reportes" y el submenú de reportes
+        const reportesBtn = document.getElementById('reportesBtn');
+        const submenuReportes = document.getElementById('submenuReportes');
+
+        // Mostrar el submenú cuando se pasa el ratón sobre "Reportes"
+        reportesBtn.addEventListener('mouseover', function() {
+            submenuReportes.style.display = 'flex'; // Mostrar el submenú
+        });
+
+        // Mantener el submenú abierto cuando se pasa el ratón sobre el submenú
+        submenuReportes.addEventListener('mouseover', function() {
+            submenuReportes.style.display = 'flex'; // Mantenerlo abierto
+        });
+
+        // Cerrar el submenú cuando el ratón sale del botón "Reportes" o el submenú
+        reportesBtn.addEventListener('mouseout', function() {
+            setTimeout(() => {
+                if (!submenuReportes.matches(':hover') && !reportesBtn.matches(':hover')) {
+                    submenuReportes.style.display = 'none'; // Ocultar el submenú si no está sobre él
+                }
+            }, 100); // Retraso para evitar un cierre inmediato
+        });
+    </script>
 </body>
-
 </html>
-

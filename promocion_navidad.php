@@ -1,6 +1,24 @@
 <?php
-// Inicio de sesión y conexión a la base de datos
+// Inicia la sesión
 session_start();
+
+// Función para calcular los días de estadía
+function calcularDiasEstadia($check_in, $check_out) {
+    $fecha1 = new DateTime($check_in);
+    $fecha2 = new DateTime($check_out);
+    return $fecha2->diff($fecha1)->days;
+}
+
+// Variables de sesión
+$check_in = '2024-12-24'; // Fecha de check-in
+$check_out = '2024-12-26'; // Fecha de check-out
+$cuartos_seleccionados = [
+    ['id' => 1, 'tipo_pago' => 'web'],
+    ['id' => 2, 'tipo_pago' => 'blackdays']
+]; // Habitaciones seleccionadas ejemplo
+$adultos = 2;  // Adultos por habitación
+$ninos = 0;    // Niños por habitación
+$location = 1;
 
 // Conexión a la base de datos
 $host = 'localhost';
@@ -9,12 +27,15 @@ $pass = '';
 $dbname = 'hotel_db';
 $conn = new mysqli($host, $user, $pass, $dbname);
 
-// Función para calcular los días de estadía
-function calcularDiasEstadia($check_in, $check_out) {
-    $fecha1 = new DateTime($check_in);
-    $fecha2 = new DateTime($check_out);
-    return $fecha2->diff($fecha1)->days;
+// Verificar la conexión
+if ($conn->connect_error) {
+    die("Error en la conexión a la base de datos: " . $conn->connect_error);
 }
+
+// Extraer los IDs de las habitaciones seleccionadas
+$ids = implode(',', array_map(function($cuarto) {
+    return intval($cuarto['id_cuarto']);
+}, $cuartos_seleccionados));
 
 // Consultar información de las habitaciones seleccionadas (ahora con "descripcion")
 $habitaciones_info = [];
@@ -53,33 +74,6 @@ foreach ($cuartos_seleccionados as $cuarto) {
 
 // Cálculo de días de estadía
 $dias_estadia = calcularDiasEstadia($check_in, $check_out);
-
-// Configuración específica para la promoción de Navidad (ID 1)
-$promocion_id = 1;
-$_SESSION['fechas'] = [
-    'checkin' => '2024-12-24',
-    'checkout' => '2024-12-26'
-];
-$_SESSION['habitaciones'] = [
-    [
-        'id' => 201, // ID de la habitación predefinida
-        'descripcion' => 'Habitación para 2 adultos con desayunos incluidos',
-        'precio' => 120.00 // Precio por noche
-    ]
-];
-$_SESSION['promocion'] = [
-    'id_promocion' => $promocion_id,
-    'descuento' => 0.10 // 10% de descuento
-];
-$_SESSION['total_sin_descuento'] = 240.00; // Total antes del descuento (120.00 * 2 noches)
-$_SESSION['total'] = $_SESSION['total_sin_descuento'] - ($_SESSION['total_sin_descuento'] * $_SESSION['promocion']['descuento']); // Total con descuento
-
-// Mostrar la página de promoción con los detalles configurados
-$fechas = $_SESSION['fechas'];
-$habitaciones = $_SESSION['habitaciones'];
-$promocion = $_SESSION['promocion'];
-$total_sin_descuento = $_SESSION['total_sin_descuento'];
-$total = $_SESSION['total'];
 
 // Verifica si el formulario de cliente se envió
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -507,14 +501,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php 
             // Verifica si la sesión tiene los datos necesarios
-            if (isset($_SESSION['check_in'], $_SESSION['check_out'], $_SESSION['cuartos_seleccionados'], $_SESSION['adultos'], $_SESSION['ninos'], $habitaciones_info)): 
                 $total_general = 0; // Variable para el total general de la reserva
 
                 // Calcula los días de estadía
-                $dias_estadia = calcularDiasEstadia($_SESSION['check_in'], $_SESSION['check_out']);
+                $dias_estadia = calcularDiasEstadia($check_in, $check_out);
 
                 // Asegúrate de que cuartos_seleccionados esté disponible
-                foreach ($_SESSION['cuartos_seleccionados'] as $index => $cuarto): 
+                foreach ($cuartos_seleccionados as $index => $cuarto): 
                     $numero_cuarto = '';
                     $precio_base = 0;
                     $descripcion_cuarto = '';

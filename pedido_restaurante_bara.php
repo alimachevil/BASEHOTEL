@@ -75,11 +75,6 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pedidos Restaurante y Bar</title>
-    <!-- Cargar fuentes Lato y Roboto desde Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- Cargar Font Awesome para iconos -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
     /* General Styles */
     body {
@@ -89,18 +84,12 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
         padding: 0;
         color: #333; /* Texto legible */
         line-height: 1.6; /* Espaciado agradable */
-        overflow-x: hidden; /* Ocultar el desplazamiento horizontal */
     }
 
     .container {
-        width: 100%;
+        max-width: 1200px;
         margin: 0 auto;
-        align-items: center;
         padding: 20px;
-    }
-
-    .content {
-        padding-left: 260px;
     }
 
     /* Headers */
@@ -121,12 +110,6 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
         border-bottom: 2px solid #007bff;
         display: inline-block;
         padding-bottom: 5px;
-    }
-
-    #panel {
-        
-        border-bottom: 2px solid #333333;
-    
     }
 
     /* Search Bar */
@@ -209,7 +192,7 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
 
     /* Buttons */
     .item button {
-        background-color: #feb657;
+        background-color: #007bff;
         color: white;
         border: none;
         padding: 10px 15px;
@@ -222,7 +205,7 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
     }
 
     .item button:hover {
-        background-color: #C88942;
+        background-color: #0056b3;
         box-shadow: 0 3px 6px rgba(0, 123, 255, 0.4);
     }
 
@@ -267,14 +250,14 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
         border: 2px solid transparent;
         border-radius: 5px;
         transition: all 0.3s ease;
-        background-color: #feb657;
+        background-color: #f8f9fa;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .enlace:hover {
-        background-color: #C88942;
+        background-color: #007bff;
         color: white;
-        border-color: #C88942;
+        border-color: #007bff;
         box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
     }
 
@@ -283,117 +266,6 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
         height: 24px;
         margin-right: 8px;
     }
-    /* ESTILOS NUEVOS*/
-    body {
-        font-family: 'Lato', 'Roboto', sans-serif !important;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        height: 100vh;
-        background-color: #f4f4f4;
-    }
-    .sidebar {
-        width: 250px;
-        background-color: #333;
-        color: white;
-        padding-top: 20px;
-        display: flex;
-        position: fixed;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        height: 100%;
-    }
-    .sidebar img {
-        width: 80%;
-        max-width: 150px;
-        margin-bottom: 20px;
-    }
-    .sidebar h2 {
-        text-align: center;
-        font-weight: bold;
-        font-size: 18px;
-        padding-bottom: 7px;
-        display: inline-flex;
-        align-items: center;
-        position: relative;
-        color: #fff;
-        margin-bottom: 30px;
-    }
-    .admin-menu {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-    }
-    .admin-menu form {
-        width: 100%;
-        margin-bottom: 0;
-    }
-    .admin-menu button {
-        display: flex;
-        align-items: center;
-        padding: 15px;
-        font-size: 16px;
-        background-color: #333;
-        color: white;
-        border: none;
-        cursor: pointer;
-        transition: background-color 0.3s, color 0.3s;
-        width: 100%;
-        margin-bottom: 0;
-    }
-    .admin-menu button:hover {
-        background-color: #D69C4F;
-        color: black;
-    }
-    .admin-menu button i {
-        margin-right: 10px;
-    }
-
-    /* Estilos del submenú (opciones dentro del botón PEDIDOS) */
-    .submenu {
-        display: none;
-        flex-direction: column;
-        width: 100%;
-        margin-top: 10px;
-    }
-    .submenu a {
-        display: flex;
-        align-items: center;
-        padding: 10px 15px;
-        font-size: 16px;
-        background-color: #333;
-        color: white;
-        text-decoration: none;
-        border: none;
-        transition: background-color 0.3s, color 0.3s;
-        padding-left: 30px; /* Agregar desplazamiento a la derecha */
-    }
-    .submenu a:hover {
-        background-color: #D69C4F;
-        color: black;
-    }
-    .submenu a i {
-        margin-right: 10px;
-    }
-
-    /* Efecto de deslizamiento hacia abajo */
-    .admin-menu button.active + .submenu {
-        display: flex;
-        animation: slideDown 0.3s ease-out;
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            max-height: 0;
-        }
-        to {
-            opacity: 1;
-            max-height: 500px;
-        }
-    }
-
     </style>
     <script>
         function buscar(inputId, menuClass) {
@@ -409,33 +281,6 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
     </script>
 </head>
 <body>
-    <div class="sidebar">
-        <!-- Espacio para el logo -->
-        <img src="images/logo.png" alt="Logo">
-        <h2 id="panel">Panel de Control del Administrador</h2>
-        <div class="admin-menu">
-            <form action="reserva_pago_opcion1.php" method="GET">
-                <button type="submit"><i class="fas fa-user"></i>Datos de Acompañantes</button>
-            </form>
-            <form action="pedido_restaurante_bar.php" method="GET">
-                <button type="button" id="pedidosBtn"><i class="fas fa-utensils"></i>Pedidos</button>
-                <div class="submenu" id="submenuPedidos">
-                    <a href="pedido_restaurante_bar.php#restaurante"><i class="fas fa-cocktail"></i>Restaurante</a>
-                    <a href="pedido_restaurante_bar.php#bar"><i class="fas fa-beer"></i>Bar</a>
-                    <a href="pedido_restaurante_bar.php#habitacion"><i class="fas fa-bed"></i>Habitación</a>
-                </div>
-            </form>
-            <form action="reportes.php" method="GET">
-                <button type="button" id="reportesBtn"><i class="fas fa-file-alt"></i>Reportes</button>
-                <div class="submenu" id="submenuReportes">
-                    <a href="reportes.php?reporte=listado_huespedes"><i class="fas fa-users"></i>Listado de Huéspedes</a>
-                    <a href="reportes.php?reporte=ranking_habitaciones"><i class="fas fa-bed"></i>Ranking de Cuartos</a>
-                    <a href="reportes.php?reporte=reporte_monto_restaurante"><i class="fas fa-utensils"></i>Reporte Monto Restaurante</a>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div class="content">
     <div class="container">
         <h1>Pedidos Restaurante y Bar</h1>
         <?php if ($mensaje): ?>
@@ -526,44 +371,5 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
         </button>
     </form>
     <?php endif; ?>
-    </div>
-
-    <script>
-        // Script para manejar los submenús
-        const pedidosBtn = document.getElementById('pedidosBtn');
-        const submenuPedidos = document.getElementById('submenuPedidos');
-        const reportesBtn = document.getElementById('reportesBtn');
-        const submenuReportes = document.getElementById('submenuReportes');
-
-        // Mostrar y ocultar submenú de pedidos
-        pedidosBtn.addEventListener('mouseover', function() {
-            submenuPedidos.style.display = 'flex';
-        });
-        submenuPedidos.addEventListener('mouseover', function() {
-            submenuPedidos.style.display = 'flex';
-        });
-        pedidosBtn.addEventListener('mouseout', function() {
-            setTimeout(() => {
-                if (!submenuPedidos.matches(':hover') && !pedidosBtn.matches(':hover')) {
-                    submenuPedidos.style.display = 'none';
-                }
-            }, 100);
-        });
-
-        // Mostrar y ocultar submenú de reportes
-        reportesBtn.addEventListener('mouseover', function() {
-            submenuReportes.style.display = 'flex';
-        });
-        submenuReportes.addEventListener('mouseover', function() {
-            submenuReportes.style.display = 'flex';
-        });
-        reportesBtn.addEventListener('mouseout', function() {
-            setTimeout(() => {
-                if (!submenuReportes.matches(':hover') && !reportesBtn.matches(':hover')) {
-                    submenuReportes.style.display = 'none';
-                }
-            }, 100);
-        });
-    </script>
 </body>
 </html>
