@@ -347,6 +347,9 @@ if (!isset($_SESSION['id_reserva'])) {
                     <a href="reportes.php?reporte=ranking_bebidas_bar"><i class="fas fa-beer"></i>Ranking Bebidas Bar</a>
                 </div>
             </form>
+            <form action="consulta_consumo.php" method="GET">
+                <button type="submit"><i class="fas fa-file"></i>Consumo Total</button>
+            </form>
         </div>
     </div>
     <div class="content">
@@ -1095,6 +1098,9 @@ $maxHuespedes = $habitacion_actual['capacidad_adultos'] + $habitacion_actual['ca
                     <a href="reportes.php?reporte=ranking_productos_restaurante"><i class="fas fa-cocktail"></i>Ranking Productos Restaurante</a>
                     <a href="reportes.php?reporte=ranking_bebidas_bar"><i class="fas fa-beer"></i>Ranking Bebidas Bar</a>
                 </div>
+            </form>
+            <form action="consulta_consumo.php" method="GET">
+                <button type="submit"><i class="fas fa-file"></i>Consumo Total</button>
             </form>
         </div>
     </div>

@@ -433,6 +433,9 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
                     <a href="reportes.php?reporte=reporte_monto_restaurante"><i class="fas fa-utensils"></i>Reporte Monto Restaurante</a>
                 </div>
             </form>
+            <form action="consulta_consumo.php" method="GET">
+                <button type="submit"><i class="fas fa-file"></i>Consumo Total</button>
+            </form>
         </div>
     </div>
     <div class="content">

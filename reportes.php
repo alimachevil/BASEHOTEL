@@ -411,6 +411,9 @@ table tbody tr:hover {
                     <a href="?reporte=ranking_bebidas_bar"><i class="fas fa-beer"></i>Ranking Bebidas Bar</a>
                 </div>
             </form>
+            <form action="consulta_consumo.php" method="GET">
+                <button type="submit"><i class="fas fa-file"></i>Consumo Total</button>
+            </form>
         </div>
     </div>
 

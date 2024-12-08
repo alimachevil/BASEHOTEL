@@ -1,29 +1,138 @@
 <?php
-// Iniciar la sesión
+// Inicia la sesión
 session_start();
 
-// Limpiar todos los datos de la sesión
-session_unset();  // Elimina todas las variables de la sesión
-session_destroy();  // Destruye la sesión
+// Manejar reinicio de sesión
+if (isset($_GET['reset']) && $_GET['reset'] === '1') {
+    unset($_SESSION['id_reserva'], $_SESSION['habitaciones'], $_SESSION['habitacion_actual']);
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit();
+}
 
-// Volver a iniciar la sesión para continuar utilizando la funcionalidad si es necesario
-session_start();
-?>
+// Conexión a la base de datos
+$host = 'localhost';
+$user = 'root';
+$pass = '';
+$dbname = 'hotel_db';
+$conn = new mysqli($host, $user, $pass, $dbname);
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control del Administrador</title>
-    
-    <!-- Cargar fuentes Lato y Roboto desde Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- Cargar Font Awesome para iconos -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+// Verificar la conexión
+if ($conn->connect_error) {
+    die("Error en la conexión a la base de datos: " . $conn->connect_error);
+}
 
-    <style>
+// Si no se ha ingresado un código de cuenta, solicitarlo
+if (!isset($_SESSION['id_cuenta'])) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['codigo_cuenta'])) {
+        $codigo_cuenta = trim($_POST['codigo_cuenta']);
+
+        // Verificar el código de cuenta en la tabla cuenta_cobranza
+        $stmt = $conn->prepare("SELECT id_cuenta FROM cuenta_cobranza WHERE id_cuenta = ?");
+        $stmt->bind_param("i", $codigo_cuenta);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            // Si se encuentra la cuenta, guardar en sesión
+            $_SESSION['id_cuenta'] = $codigo_cuenta;
+
+            // Redirigir a la página de facturación
+            header('Location: facturaconsumo.php');
+            exit();
+        } else {
+            $error = "Cuenta no existente.";
+        }
+    }
+    ?>
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Ingresar Código de Reserva</title>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <style>
+        /* Estilo general */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #FFFFFF;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .container h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .error {
+            color: #ff4d4d;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #C88942;
+        }
+
+        button {
+            background-color: #D69C4F;
+            color: #fff;
+            font-size: 16px;
+            font-weight: normal;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #C88942;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
         /* Estilos generales */
         body {
             font-family: 'Lato', 'Roboto', sans-serif !important;
@@ -31,7 +140,7 @@ session_start();
             padding: 0;
             display: flex;
             height: 100vh;
-            background-color: #f4f4f4;
+            background-color: #FFFFFF;
         }
         .sidebar {
             width: 250px;
@@ -173,9 +282,10 @@ session_start();
         .content .option-box div:hover {
             background-color: #218838;
         }
+        
     </style>
-</head>
-<body>
+    </head>
+    <body>
     <div class="sidebar">
         <!-- Espacio para el logo -->
         <img src="images/logo.png" alt="Logo">
@@ -208,10 +318,18 @@ session_start();
         </div>
     </div>
     <div class="content">
-        <h2>Bienvenido al Panel de Control</h2>
-        <p>Selecciona una de las opciones del menú a la izquierda para continuar.</p>
+        <div class="container">
+            <h1>Ingresar Código de Cuenta</h1>
+            <?php if (isset($error)): ?>
+                <p class="error"><?php echo htmlspecialchars($error); ?></p>
+            <?php endif; ?>
+            <form method="POST">
+                <label for="codigo_cuenta">Código de Cuenta:</label>
+                <input type="text" id="codigo_cuenta" name="codigo_cuenta" placeholder="Ingrese el código de cuenta" required>
+                <button type="submit">Buscar</button>
+            </form>
+        </div>  
     </div>
-
     <script>
         // Obtener el contenedor del botón "Pedidos" y el submenú
         const pedidosBtn = document.getElementById('pedidosBtn');
@@ -261,3 +379,7 @@ session_start();
     </script>
 </body>
 </html>
+    <?php
+    exit();
+}
+?>

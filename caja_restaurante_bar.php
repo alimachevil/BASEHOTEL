@@ -398,6 +398,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_reserva'])) {
                     <a href="reportes.php?reporte=ranking_bebidas_bar"><i class="fas fa-beer"></i>Ranking Bebidas Bar</a>
                 </div>
             </form>
+            <form action="consulta_consumo.php" method="GET">
+                <button type="submit"><i class="fas fa-file"></i>Consumo Total</button>
+            </form>
         </div>
     </div>
     <div class="content">
