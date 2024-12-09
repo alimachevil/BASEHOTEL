@@ -178,8 +178,8 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
     }
 
     .item img {
-        max-width: 100%;
-        height: auto;
+        max-width: 150px;
+        max-height: 100px;
         border-radius: 10px;
         margin-bottom: 10px;
     }
@@ -511,7 +511,7 @@ $mensaje = isset($_GET['mensaje']) ? htmlspecialchars($_GET['mensaje']) : '';
         <div class="menu menu_habitacion">
             <?php while ($item = $habitacion->fetch_assoc()): ?>
                 <div class="item">
-                <img src="img/bebidas/<?php echo $item['id_servicio']; ?>.jpg" alt="Imagen de <?php echo htmlspecialchars($item['nombre_producto']); ?>">
+                <img src="img/habitacion/<?php echo $item['id_servicio']; ?>.jpg" alt="Imagen de <?php echo htmlspecialchars($item['nombre_producto']); ?>">
                     <h3><?php echo $item['nombre_producto']; ?></h3>
                     <p><strong>S/ <?php echo number_format($item['precio'], 2); ?></strong></p>
                     <form method="POST">

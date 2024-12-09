@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_reserva'])) {
 
         h1 {
             text-align: center;
-            color: #007BFF;
+            color: #D69C4F;
             margin-top: 20px;
         }
 
@@ -189,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_reserva'])) {
         }
 
         th {
-            background-color: #007BFF;
+            background-color: #D69C4F;
             color: #fff;
         }
 
